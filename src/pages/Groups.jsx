@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CITIES, carById, bestOffer, savingsVsEstimate, STATUS_META } from '../data.js';
-import { Badge, Countdown, ProgressBar, CarArt, SectionHeading } from '../ui.jsx';
+import { Badge, Countdown, ProgressBar, CarPhoto, SectionHeading } from '../ui.jsx';
 import { fmtINR } from '../utils.js';
 import { useApp } from '../store.jsx';
 
@@ -20,7 +20,7 @@ export function GroupCard({ group }) {
           <Badge cls={meta.cls}>{meta.label}</Badge>
           <Countdown deadline={group.deadline} />
         </div>
-        <CarArt body={car.body} type={car.type} className="mx-auto mt-2 w-56 max-w-full" />
+        <CarPhoto car={car} className="mx-auto mt-2 w-full max-w-xs" />
       </div>
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2">
