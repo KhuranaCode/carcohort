@@ -28,7 +28,7 @@ export function Navbar() {
     `rounded-full px-3 py-2 text-[13px] font-semibold tracking-wide transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-600 hover:text-white'}`;
   return (
     <header className="sticky top-0 z-40 h-0 px-3 sm:px-6">
-      <div className="glass mx-auto mt-3 flex h-14 max-w-7xl items-center justify-between rounded-full px-4 sm:px-6">
+      <div className="glass header-pill mx-auto mt-3 flex h-14 max-w-7xl items-center justify-between rounded-full px-4 sm:px-6">
         <Logo />
         <nav className="hidden items-center gap-1 md:flex">
           <NavLink to="/cars" className={linkCls}>Vehicles</NavLink>
