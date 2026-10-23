@@ -7,9 +7,13 @@ import { useApp } from '../store.jsx';
 
 export default function GroupDetail() {
   const { id } = useParams();
-  const group = findGroup(id);
   const nav = useNavigate();
-  const { state, joinGroup, leaveGroup, reserveOffer, toggleAlert, findGroup } = useApp();
+  const { state, joinGroup, leaveGroup, reserveOffer, toggleAlert, findGroup, data } = useApp();
+  const group = findGroup(id);
+  // Buyer's own request for this model+city (if any) drives per-offer eligibility signals.
+  const myRequest = state.user
+    ? (data.requests || []).find((r) => r.carId === group?.carId && r.city === group?.city && (r.name || '').toLowerCase() === state.user.name.toLowerCase())
+    : null;
   const [confirmOffer, setConfirmOffer] = useState(null);
 
   // Offers are only comparable within the same variant - group them so a
@@ -67,7 +71,7 @@ export default function GroupDetail() {
             <div className="mt-6 max-w-md"><ProgressBar value={members} max={group.target} /></div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Est. on-road ({group.city})</p><p className="font-display text-lg font-extrabold text-slate-700">{fmtINR(est)}</p></div>
-              <div className="rounded-xl bg-emerald-50 p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">Lowest offer in group</p><p className="font-display text-lg font-extrabold text-emerald-700">{offers.length ? fmtINR(offers[0].onRoad) : 'Awaiting bids'}</p>{offers.length > 0 && <p className="mt-0.5 text-[11px] text-emerald-600">{offers[0].variant || 'Variant not specified'} - check it matches your request</p>}</div>
+              <div className="rounded-xl bg-emerald-50 p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">Lowest listed offer</p><p className="font-display text-lg font-extrabold text-emerald-700">{offers.length ? fmtINR(offers[0].onRoad) : 'Awaiting bids'}</p>{offers.length > 0 && <p className="mt-0.5 text-[11px] text-emerald-600">{offers[0].variant || 'Variant not specified'} - check it matches your request</p>}</div>
               <div className="rounded-xl bg-amber-50 p-4"><p className="text-[11px] font-semibold uppercase tracking-wide text-amber-600">Indicative saving</p><p className="font-display text-lg font-extrabold text-amber-700">{saving > 0 ? fmtINR(saving) : '-'}</p></div>
             </div>
             <p className="mt-3 text-[11px] text-slate-400">Estimates use an indicative {Math.round((CITY_UPLIFT[group.city] || 0.13) * 100)}% on-road uplift for {group.city}. Final prices come only from dealer offers. Savings are never guaranteed.</p>
@@ -106,7 +110,24 @@ export default function GroupDetail() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-display text-lg font-bold text-brand-950">{o.dealer}</h3>
-                      {i === 0 && <Badge cls="bg-emerald-100 text-emerald-800">Lowest on-road</Badge>}
+                      {i === 0 && vg.offers.length > 1 && <Badge cls="bg-emerald-100 text-emerald-800">Lowest listed on-road (this variant)</Badge>}
+                      {i === 0 && vg.offers.length === 1 && <Badge cls="bg-slate-100 text-slate-600">Only offer for this variant</Badge>}
+                      {myRequest && (() => {
+                        const want = (myRequest.variantText || '').trim().toLowerCase();
+                        const got = (o.variant || '').trim().toLowerCase();
+                        if (!want) return <Badge cls="bg-slate-100 text-slate-600">Variant unconfirmed on your request - confirm before comparing</Badge>;
+                        if (want !== got) return <Badge cls="bg-amber-100 text-amber-800">Different variant than your request ({myRequest.variantText}) - not directly comparable</Badge>;
+                        return (
+                          <>
+                            <Badge cls="bg-emerald-100 text-emerald-800">Matches your requested variant</Badge>
+                            {o.onRoad <= myRequest.budget
+                              ? <Badge cls="bg-emerald-100 text-emerald-800">Within your {fmtINR(myRequest.budget)} budget</Badge>
+                              : <Badge cls="bg-amber-100 text-amber-800">Above your {fmtINR(myRequest.budget)} budget</Badge>}
+                            {group.deliveryBy && myRequest.deliveryBy && group.deliveryBy > myRequest.deliveryBy
+                              && <Badge cls="bg-amber-100 text-amber-800">Group delivery later than your {fmtDate(myRequest.deliveryBy)}</Badge>}
+                          </>
+                        );
+                      })()}
                       {o.mine && <Badge cls="bg-brand-50 text-brand-800">Your offer</Badge>}
                     </div>
                     <p className="mt-0.5 text-xs text-slate-500">★ {o.rating} dealer rating · valid till {fmtDate(o.validTill)}</p>
@@ -114,7 +135,7 @@ export default function GroupDetail() {
                   <div className="text-right">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Final on-road price</p>
                     <p className="font-display text-2xl font-extrabold text-brand-900">{fmtINR(o.onRoad)}</p>
-                    <p className="text-xs font-semibold text-emerald-600">{fmtINR(est - o.onRoad)} below estimate</p>
+                    {est > o.onRoad && <p className="text-xs font-semibold text-emerald-600">{fmtINR(est - o.onRoad)} below estimate</p>}
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
