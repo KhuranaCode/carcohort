@@ -26,6 +26,8 @@ Dealers get ready demand. Buyers get the leverage of twenty. Everyone keeps thei
 
 ## Run it
 
+> Note on this GitHub copy: `package-lock.json` is one commit behind `package.json` (smoke-test dev dependencies). Use `npm install`, which reconciles the lockfile automatically; `npm ci` will fail until the lockfile is regenerated. Verified from this exact tree: install, build, API tests and DOM smoke tests all pass.
+
 ```bash
 npm install
 npm run build     # build the frontend into dist/
