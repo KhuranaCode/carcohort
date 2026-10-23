@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { GROUPS, TYPE_META } from '../data.js';
+import { TYPE_META } from '../data.js';
 import { useApp } from '../store.jsx';
 import { Badge, CarArt, SectionHeading } from '../ui.jsx';
 import { fmtINR } from '../utils.js';
@@ -20,7 +20,7 @@ export default function Cars() {
     if (budget === 'Above ₹20L' && c.exMin < 2000000) return false;
     return true;
   }), [body, budget, vtype, data.cars]);
-  const groupCount = (carId) => GROUPS.filter((g) => g.carId === carId).length;
+  const groupCount = (carId) => data.groups.filter((g) => g.carId === carId).length;
 
   return (
     <div className="container-x py-12">
