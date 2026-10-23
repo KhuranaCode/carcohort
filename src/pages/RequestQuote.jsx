@@ -137,7 +137,7 @@ export default function RequestQuote() {
           </div>
         )}
         {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-        <button className="btn-primary w-full !py-3.5" type="submit">
+        <button className="btn-primary w-full !py-3.5" type="button" onClick={(e) => { const f = e.currentTarget.form; if (f && f.reportValidity()) f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }}>
           {state.user ? 'Save request & invite dealer bids (demo)' : 'Sign in to submit your request'}
         </button>
       </form>
