@@ -78,6 +78,7 @@ export function createApp() {
     const { id } = req.params;
     if (!allGroups(loadDb()).some((g) => g.id === id)) return res.status(404).json({ error: 'unknown group' });
     const dealer = String(req.body?.dealer || '').trim().slice(0, 80);
+    const variant = String(req.body?.variant || '').trim().slice(0, 60);
     const onRoad = Number.parseInt(req.body?.onRoad, 10);
     if (!dealer) return res.status(400).json({ error: 'dealer required' });
     if (!Number.isFinite(onRoad) || onRoad < 30000 || onRoad > 100000000) {
@@ -89,6 +90,7 @@ export function createApp() {
     const offer = {
       id: `srv-${Date.now().toString(36)}`,
       dealer,
+      variant,
       onRoad,
       inclusions,
       validTill: String(req.body?.validTill || '').slice(0, 10),
@@ -126,7 +128,10 @@ export function createApp() {
       at: new Date().toISOString(),
     };
     (db.requests || (db.requests = [])).push(rec);
-    // Exact match = same model + city group. Otherwise this request starts a
+    // Groups form per model + city (the bargaining unit). The request keeps the buyer's
+    // exact variant, budget and delivery date; dealers quote against those, and offers
+    // carry the variant they cover so buyers compare like-for-like, not price alone.
+    // Match = same model + city group. Otherwise this request starts a
     // new group (persisted) that dealers would be invited to bid on.
     const existing = allGroups(db).find((g) => g.carId === carId && g.city === city);
     let groupId = existing?.id || null;
