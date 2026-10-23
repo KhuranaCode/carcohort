@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html { scroll-behavior: smooth; color-scheme: dark; }
+html { scroll-behavior: smooth; color-scheme: dark; scroll-padding-top: 6rem; }
 body { @apply bg-ink-900 text-slate-700 font-sans antialiased; }
 h1, h2, h3 { font-family: Manrope, Inter, system-ui, sans-serif; letter-spacing: -0.02em; }
 ::selection { background: #e50914; color: #fff; }
@@ -73,3 +73,4 @@ select.input option { background: #111114; color: #fff; }
   .cursor-glow { display: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+.header-pill { background: rgba(10,10,12,0.92) !important; }
