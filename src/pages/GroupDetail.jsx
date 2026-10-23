@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { carById, estimateOnRoad, bestOffer, savingsVsEstimate, STATUS_META, CITY_UPLIFT } from '../data.js';
-import { Badge, Countdown, ProgressBar, CarArt, Modal } from '../ui.jsx';
+import { Badge, Countdown, ProgressBar, CarPhoto, Modal } from '../ui.jsx';
 import { fmtINR, fmtDate, daysLeft } from '../utils.js';
 import { useApp } from '../store.jsx';
 
@@ -62,7 +62,7 @@ export default function GroupDetail() {
             <div className="flex items-center gap-2"><Badge cls={meta.cls}>{meta.label}</Badge><Countdown deadline={group.deadline} /></div>
             <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight">{car.name}</h1>
             <p className="mt-1 text-slate-600">{car.body} · {car.fuel}{group.deliveryBy ? ` · requested delivery by ${fmtDate(group.deliveryBy)}` : ''}</p>
-            <CarArt body={car.body} type={car.type} className="mx-auto mt-4 w-64 max-w-full" />
+            <CarPhoto car={car} className="mx-auto mt-4 w-full max-w-sm" />
             <p className="mt-2 text-center text-xs text-slate-400">Ex-showroom {fmtINR(car.exMin)} - {fmtINR(car.exMax)} (indicative)</p>
           </div>
           <div className="p-8 lg:col-span-3">
@@ -206,4 +206,4 @@ export default function GroupDetail() {
       )}
     </div>
   );
-}
+              }
