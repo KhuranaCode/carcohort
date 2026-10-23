@@ -13,7 +13,7 @@ import ForDealers from './pages/Dealers.jsx';
 import DealerDashboard from './pages/DealerDashboard.jsx';
 import SignIn from './pages/SignIn.jsx';
 import RequestQuote from './pages/RequestQuote.jsx';
-import { Terms, Privacy, Security } from './pages/Legal.jsx';
+import { Terms, Privacy, Security, Credits } from './pages/Legal.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 export function Shell() {
@@ -43,6 +43,7 @@ export function Shell() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/credits" element={<Credits />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
