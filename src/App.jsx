@@ -4,6 +4,7 @@ import { Navbar, Footer } from './ui.jsx';
 import Landing from './pages/Landing.jsx';
 import Cars from './pages/Cars.jsx';
 import Groups from './pages/Groups.jsx';
+import Compare from './pages/Compare.jsx';
 import GroupDetail from './pages/GroupDetail.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ForDealers from './pages/Dealers.jsx';
@@ -26,6 +27,7 @@ export default function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/cars" element={<Cars />} />
               <Route path="/groups" element={<Groups />} />
+              <Route path="/compare" element={<Compare />} />
               <Route path="/groups/:id" element={<GroupDetail />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dealers" element={<ForDealers />} />
