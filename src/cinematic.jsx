@@ -228,7 +228,7 @@ export function HorizontalJourney({ panels, label = 'CarCohort journey' }) {
             {p.image && <img className="hj-bg" src={p.image} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />}
             <div className="hj-shade" />
             <div className="hj-inner relative z-[2] flex h-full flex-col px-6 pb-24 pt-24 sm:px-12 lg:px-20 lg:pb-28 lg:pt-28"><div className="mt-auto">{p.content}</div></div>
-            <p className="absolute right-4 top-[4.5rem] z-[3] hidden text-[10px] normal-case tracking-normal uppercase tracking-[0.18em] text-white/40 sm:block lg:right-8 lg:top-auto lg:bottom-14">{p.credit ? <>Photo: {p.credit} · <Link className="pointer-events-auto underline" to="/credits">credits</Link></> : 'Photo'}</p>
+            <p className="absolute bottom-[3.7rem] left-4 right-4 z-[3] text-[10px] normal-case leading-tight tracking-normal text-white/70 sm:left-auto sm:top-[4.5rem] sm:bottom-auto sm:right-4 sm:text-white/55 lg:right-8 lg:top-auto lg:bottom-14">{p.credit ? <>Photo: {p.credit} · <Link className="pointer-events-auto underline" to="/credits">credits</Link></> : 'Photo'}</p>
           </article>
         ))}
       </div>
