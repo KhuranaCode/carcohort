@@ -1,63 +1,68 @@
 # CarCohort
 
-**India's group vehicle-buying platform - working prototype.** Buying a car or bike in India is a negotiation you're set up to lose: one buyer has no leverage against a showroom. CarCohort groups buyers who want the same vehicle in the same city, tells dealerships *"20 ready buyers - what's your best on-road price?"*, and puts every competing offer side by side.
+**Group vehicle buying for India - interactive prototype.** One buyer has little leverage against a showroom. CarCohort explores a different approach: group buyers who want the same vehicle in the same city, ask dealerships for their best final on-road price, and show the competing offers side by side. Every buyer still owns their own vehicle.
 
-Dealers get ready demand. Buyers get the leverage of twenty. Everyone keeps their own vehicle.
+> **Prototype notice.** Every group, dealer, offer and price in this app is fictional sample data. No dealerships are partnered, nothing is bought or sold, and savings are never guaranteed. This is not a production service and has no real authentication.
 
-> **This is an interactive prototype.** Every group, dealer, offer and price in the
-> app is fictional sample data. No real dealerships are partnered, no real
-> transactions happen, and savings are never guaranteed.
+Similar group-buying ideas already exist (for example groupwe.in, groupify.co.in and ekatraonline.com). This project makes no claim to be first or unique; it is a design and engineering prototype.
 
-## What the prototype does
+## Screenshots
 
-- **Buyer quote requests** - pick a vehicle (car, bike, scooter, EV), exact variant tier, registration city, budget and requested delivery date. Dealers would be invited to bid against that exact request.
-- **Live buying groups** - sample groups across Mumbai, Delhi NCR, Bengaluru, Pune and Chandigarh. Joining is free and non-binding.
-- **Dealer competition** - dealerships bid a single final on-road price plus inclusions (insurance, warranty, accessories); the lowest comparable offer surfaces first, with charges and delivery terms visible.
-- **Offer reservation** - free, non-binding, no payment on-platform; the proposed live flow routes VIN + pre-delivery-inspection verification before any money moves at the dealership.
-- **Buyer dashboard + dealer portal** - join groups, track offers, place bids.
-- **Not car sharing** - every buyer owns their own vehicle, registered in their own name.
+| | |
+| --- | --- |
+| ![Landing hero](docs/screenshots/78-01-desktop-hero.jpg) | ![Journey scene](docs/screenshots/79-02-desktop-journey.jpg) |
+| ![Vehicle catalogue](docs/screenshots/80-03-desktop-catalogue.jpg) | ![Group page with dealer offers](docs/screenshots/81-04-desktop-group.jpg) |
+| ![Photo credits page](docs/screenshots/82-05-desktop-photo-credits.jpg) | ![Mobile home](docs/screenshots/83-06-mobile-home.jpg) |
 
-## Architecture
+Mobile catalogue: ![Mobile catalogue](docs/screenshots/84-07-mobile-catalogue.jpg)
 
-- **Frontend**: React 18 + Vite + Tailwind CSS 3 + React Router 6 (hash routing)
-- **Backend**: Node + Express API (`server/`), JSON-file persistence (`server/db.json`) - joins, dealer offers, reservations and buyer requests persist across restarts and browsers
-- **Seed data**: one source of truth in `src/data.js`, shared by client and server
-- **Tests**: `node:test` API suite (8 tests: bootstrap, idempotent join/leave, offer validation + persistence, reservation integrity, 404s, buyer requests) plus a headless-DOM smoke walk (group detail, reserve flow, dashboard, compare)
+Vehicle photos are real photographs from Wikimedia Commons, each with author and licence on the in-app Photo credits page and in `src/assets/photos/credits.json`. Each photo is labelled with the model, generation and market it actually shows, which can differ from a current variant. The Ather 450X has no verified openly licensed photo yet and shows a labelled placeholder.
 
-## Run it
+## Features
+
+- Cinematic dark redesign with a pinned horizontal scroll journey on desktop (GSAP ScrollTrigger) and a swipe version on touch devices, small screens and for reduced-motion users.
+- Buyer quote requests: vehicle, variant, city, budget and delivery date.
+- Sample live groups in Mumbai, Delhi NCR, Bengaluru, Pune and Chandigarh. Joining and leaving is free and non-binding.
+- Dealer portal: dealers submit a bid with a final on-road price and inclusions; the lowest comparable offer surfaces first.
+- Offers can carry an expiry date; expired offers cannot be reserved (the API returns 409).
+- Side-by-side offer comparison.
+- Terms, Privacy, Security and Photo credits pages. These are prototype notices written from what the code does. Operator, contact, governing-law and retention details are intentionally left undefined, not invented.
+
+## What this is not (yet)
+
+- No real accounts. Sign-in is a demo name picker; anyone can use any name. `?name=` filtering on the optional API only reduces what the bootstrap call returns, it is not access control. Do not enter real personal data.
+- No payments, no dealer partnerships, no notifications, no price guarantee from dealers, no automatic closing of groups.
+- Dealer ratings are labelled unverified samples.
+- The public GitHub Pages demo is static: seed data only, state lives in your browser and resets, no backend.
+
+## Run locally
 
 ```bash
-npm install
-npm run build     # build the frontend into dist/
-npm start         # serves API + built app on http://localhost:3001
+npm ci
+npm run build          # frontend into dist/
+npm start              # API + built app on http://127.0.0.1:3001 (loopback only by default)
 
-# development (two terminals):
-npm run server    # API on :3001
-npm run dev       # Vite dev server with /api proxy
+# development, two terminals
+npm run server         # API on :3001
+npm run dev            # Vite with /api proxy
 
-npm test          # run the API test suite
+npm test               # API tests + headless smoke walk
 ```
 
-## Prototype vs production
+Set `HOST` to change the bind address. Do not expose the API publicly: it has no real authentication.
 
-| Works in the prototype | Deliberately not built yet |
-| --- | --- |
-| Full browse/request/join/bid/reserve flows | Real dealer partnerships or outreach |
-| Multi-browser persistence via local server | Real auth (OTP/KYC) - demo sign-in only |
-| Variant, budget, delivery-date requests | Payments of any kind |
-| Dealer bid submission + comparison | Live RTO/insurance quote integrations |
-| Proposed PDI/VIN trust flow (described) | Verified inspection operations |
+## Security notes
 
-## License
+Express path: security headers and CSP, 10 kB JSON body limit, in-memory rate limits (per IP), caps on stored records, loopback bind by default. Rate limits and headers do not replace authentication. `npm audit` still reports development-server and build-time advisories (vite, esbuild, tailwind/postcss) that need major upgrades; they do not ship in the built site.
 
-MIT - see [LICENSE](LICENSE).
+## Stack
 
+React 18, Vite, Tailwind CSS 3, React Router (hash routing), GSAP, Node + Express with JSON-file storage in `server/`. Seed data lives in `src/data.js`.
 
-## Cinematic redesign (October 2026)
+## Photo licences
 
-- Dark graphite/red theme applied app-wide by remapping the Tailwind palette in `tailwind.config.js`.
-- Landing page: full-screen hero, pinned horizontal journey (GSAP ScrollTrigger, `src/cinematic.jsx`), independent drag/arrow carousels, count-up stats, loader, cursor glow.
-- Touch devices, screens under 1024px and `prefers-reduced-motion` get a native swipe row instead of pinning.
-- New dependency: `gsap`. Run `npm install` (the lockfile may lag; `npm ci` can fail until it is regenerated).
-- Vehicle photos in `src/assets/photos` are real photographs from Wikimedia Commons with author and licence in `credits.json` and the in-app Photo credits page. 13 of 19 catalogue vehicles have a verified match; Swift, City, Seltos, Hector, Ola S1 Pro and Ather 450X show a labelled placeholder until a correctly matching openly licensed photo is found. `src/assets/scenes` holds earlier AI-generated placeholder art that is no longer used.
-- Hosted phone preview (Instinct File) is a build of this same source (`src/hosted.jsx`) using seed data and no API server.
+Photos are Creative Commons (CC BY, CC BY-SA, CC0) from Wikimedia Commons. CC BY-SA photos are shared under the same licence. One photo (MG Hector) has its number plate blurred. See `/credits` in the app.
+
+## Licence
+
+Code: MIT, see [LICENSE](LICENSE). Photos keep their own licences as listed above.
