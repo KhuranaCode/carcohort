@@ -11,6 +11,7 @@ export default function RequestQuote() {
   const [type, setType] = useState('car');
   const [carId, setCarId] = useState('');
   const [variant, setVariant] = useState('mid');
+  const [variantText, setVariantText] = useState('');
   const [city, setCity] = useState('Mumbai');
   const [budget, setBudget] = useState('');
   const [deliveryBy, setDeliveryBy] = useState('');
@@ -25,7 +26,7 @@ export default function RequestQuote() {
     e.preventDefault();
     setError('');
     if (!state.user) { nav('/signin', { state: { back: '/request' } }); return; }
-    const payload = { name: state.user.name, carId, variant, city, budget, deliveryBy };
+    const payload = { name: state.user.name, carId, variant, variantText: variantText.trim(), city, budget, deliveryBy };
     if (apiMode) {
       try {
         const r = await fetch('/api/requests', {
@@ -108,6 +109,11 @@ export default function RequestQuote() {
             <select className="input" value={variant} onChange={(e) => setVariant(e.target.value)} disabled={!car}>
               {tiers.map((v) => <option key={v.id} value={v.id}>{v.label} (~{fmtINR(v.ex)} ex-showroom)</option>)}
             </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="label">Exact variant name (as the brochure calls it)</label>
+            <input className="input" placeholder="e.g. SX(O) Petrol DCT - offers are matched against this" value={variantText} onChange={(e) => setVariantText(e.target.value)} />
+            <p className="mt-1 text-[11px] text-slate-400">Dealer offers name the exact variant they cover; we only mark an offer eligible for you when this matches.</p>
           </div>
           <div>
             <label className="label">Registration city</label>
