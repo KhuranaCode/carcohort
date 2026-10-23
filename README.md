@@ -59,5 +59,5 @@ MIT - see [LICENSE](LICENSE).
 - Landing page: full-screen hero, pinned horizontal journey (GSAP ScrollTrigger, `src/cinematic.jsx`), independent drag/arrow carousels, count-up stats, loader, cursor glow.
 - Touch devices, screens under 1024px and `prefers-reduced-motion` get a native swipe row instead of pinning.
 - New dependency: `gsap`. Run `npm install` (the lockfile may lag; `npm ci` can fail until it is regenerated).
-- Scene photos in `src/assets/scenes` are AI-generated, illustrative, not specific listed models.
+- Vehicle photos in `src/assets/photos` are real photographs from Wikimedia Commons with author and licence in `credits.json` and the in-app Photo credits page. 13 of 19 catalogue vehicles have a verified match; Swift, City, Seltos, Hector, Ola S1 Pro and Ather 450X show a labelled placeholder until a correctly matching openly licensed photo is found. `src/assets/scenes` holds earlier AI-generated placeholder art that is no longer used.
 - Hosted phone preview (Instinct File) is a build of this same source (`src/hosted.jsx`) using seed data and no API server.
