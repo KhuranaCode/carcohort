@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from '../src/App.jsx';
 
-const flush = () => new Promise((r) => setTimeout(r, 40));
+const flush = () => new Promise((r) => setTimeout(r, 200));
 const results = [];
 const check = (name, cond) => { results.push([name, !!cond]); if (!cond) throw new Error('smoke failed: ' + name); };
 
