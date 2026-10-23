@@ -32,6 +32,7 @@ export function Navbar() {
         <nav className="hidden items-center gap-1 md:flex">
           <NavLink to="/cars" className={linkCls}>Vehicles</NavLink>
           <NavLink to="/groups" className={linkCls}>Live groups</NavLink>
+          <NavLink to="/compare" className={linkCls}>Compare</NavLink>
           <NavLink to="/dealers" className={linkCls}>For dealers</NavLink>
           {state.user?.role === 'dealer'
             ? <NavLink to="/dealer/dashboard" className={linkCls}>Dealer dashboard</NavLink>
@@ -57,6 +58,7 @@ export function Navbar() {
           <div className="container-x flex flex-col gap-1 py-3" onClick={() => setOpen(false)}>
             <NavLink to="/cars" className={linkCls}>Vehicles</NavLink>
             <NavLink to="/groups" className={linkCls}>Live groups</NavLink>
+            <NavLink to="/compare" className={linkCls}>Compare</NavLink>
             <NavLink to="/dealers" className={linkCls}>For dealers</NavLink>
             {state.user?.role === 'dealer'
               ? <NavLink to="/dealer/dashboard" className={linkCls}>Dealer dashboard</NavLink>
