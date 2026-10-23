@@ -81,6 +81,7 @@ export function createApp() {
     const variant = String(req.body?.variant || '').trim().slice(0, 60);
     const onRoad = Number.parseInt(req.body?.onRoad, 10);
     if (!dealer) return res.status(400).json({ error: 'dealer required' });
+    if (!variant) return res.status(400).json({ error: 'variant required - offers must name the exact variant they cover' });
     if (!Number.isFinite(onRoad) || onRoad < 30000 || onRoad > 100000000) {
       return res.status(400).json({ error: 'onRoad must be a plausible price in INR' });
     }
@@ -111,6 +112,7 @@ export function createApp() {
     const name = String(b.name || '').trim().slice(0, 60);
     const carId = String(b.carId || '');
     const variant = String(b.variant || '').slice(0, 20);
+    const variantText = String(b.variantText || '').trim().slice(0, 60);
     const city = String(b.city || '').slice(0, 40);
     const budget = Number.parseInt(b.budget, 10);
     const deliveryBy = String(b.deliveryBy || '').slice(0, 10);
@@ -124,7 +126,7 @@ export function createApp() {
     const db = loadDb();
     const rec = {
       id: `req-${Date.now().toString(36)}`,
-      name, carId, variant, city, budget, deliveryBy,
+      name, carId, variant, variantText, city, budget, deliveryBy,
       at: new Date().toISOString(),
     };
     (db.requests || (db.requests = [])).push(rec);
