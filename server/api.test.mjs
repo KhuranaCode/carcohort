@@ -52,9 +52,14 @@ test('dealer offer validation and persistence', async () => {
     body: JSON.stringify({ dealer: 'Test Motors', onRoad: 500 }),
   });
   assert.equal(bad.status, 400);
+  const noVariant = await fetch(`${base}/api/groups/creta-mumbai/offers`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ dealer: 'Test Motors', onRoad: 1690000 }),
+  });
+  assert.equal(noVariant.status, 400);
   const good = await fetch(`${base}/api/groups/creta-mumbai/offers`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ dealer: 'Test Motors', onRoad: 1699000, inclusions: ['free mats'], validTill: '2026-11-06' }),
+    body: JSON.stringify({ dealer: 'Test Motors', variant: 'SX Petrol', onRoad: 1699000, inclusions: ['free mats'], validTill: '2026-11-06' }),
   });
   assert.equal(good.status, 201);
   const { offer } = await good.json();
