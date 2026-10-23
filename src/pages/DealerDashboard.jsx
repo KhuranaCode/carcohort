@@ -92,7 +92,7 @@ export default function DealerDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h3 className="font-display text-lg font-bold text-brand-950">{car.name} <span className="font-sans text-sm font-semibold text-slate-400">· {g.city}</span></h3>
-                  <p className="text-sm text-slate-500">Ex-showroom {fmtINR(car.exMin)}-{fmtINR(car.exMax)} · {g.offers.length + mine.length} bid{g.offers.length + mine.length === 1 ? '' : 's'} placed{g.deliveryBy ? ` · buyers want delivery by ${g.deliveryBy}` : ''}</p>
+                  <p className="text-sm text-slate-500">Ex-showroom {fmtINR(car.exMin)}-{fmtINR(car.exMax)} · {g.offers.length} bid{g.offers.length === 1 ? '' : 's'} placed{g.deliveryBy ? ` · buyers want delivery by ${g.deliveryBy}` : ''}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
