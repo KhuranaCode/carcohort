@@ -34,8 +34,9 @@ export function GroupCard({ group }) {
         <div className="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
           {best ? (
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Best offer (on-road)</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Lowest listed (on-road)</p>
               <p className="font-display text-xl font-extrabold text-brand-900">{fmtINR(best.onRoad)}</p>
+              {best.variant && <p className="mt-0.5 text-[11px] font-semibold text-brand-600">{best.variant}</p>}
             </div>
           ) : (
             <div>
