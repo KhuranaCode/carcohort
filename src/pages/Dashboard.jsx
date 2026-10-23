@@ -31,7 +31,7 @@ export default function Dashboard() {
           <h2 className="mt-10 font-display text-xl font-extrabold text-brand-950">Reserved offers</h2>
           <div className="mt-4 space-y-4">
             {reservations.map(([offerId, r]) => {
-              const g = groupById(r.groupId);
+              const g = findGroup(r.groupId);
               const o = g && g.offers.find((x) => x.id === offerId);
               if (!g || !o) return null;
               const car = carById(g.carId);
@@ -79,7 +79,7 @@ export default function Dashboard() {
                 <p className="text-sm text-slate-500">{g.city}</p>
                 <div className="mt-4"><ProgressBar value={g.members} max={g.target} /></div>
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
-                  <span className="text-slate-500">Best offer: <strong className="text-brand-900">{best ? fmtINR(best.onRoad) : 'awaiting bids'}</strong></span>
+                  <span className="text-slate-500">Lowest listed: <strong className="text-brand-900">{best ? fmtINR(best.onRoad) : 'awaiting bids'}</strong>{best?.variant ? ` · ${best.variant}` : ''}</span>
                   {saving > 0 && <Badge cls="bg-emerald-100 text-emerald-800">Save {fmtINR(saving)}*</Badge>}
                 </div>
                 {state.alerts[g.id] && <p className="mt-2 text-xs font-semibold text-brand-700">🔔 Price alerts on for this group</p>}
