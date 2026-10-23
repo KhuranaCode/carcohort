@@ -80,7 +80,7 @@ function OfferForm({ group, onDone }) {
         <label className="label">Note to the group (optional)</label>
         <input className="input" placeholder="Priority delivery within 2 weeks" value={note} onChange={(e) => setNote(e.target.value)} />
       </div>
-      <button className="btn-primary w-full" type="submit">Submit bid to {group.members} buyers</button>
+      <button className="btn-primary w-full" type="button" onClick={(e) => { const f = e.currentTarget.form; if (f && f.reportValidity()) f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }}>Submit bid to {group.members} buyers</button>
     </form>
   );
 }
