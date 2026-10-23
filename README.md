@@ -1,19 +1,5 @@
 # CarCohort
 
-> **REPOSITORY STATE (23 Oct 2026): the folders and individual files in this tree are an EARLIER, OUTDATED snapshot and may not run as-is.** Tree sync is in progress.
->
-> The canonical, tested source (commit `203e6ab`; build clean, 8/8 API tests + headless-DOM smoke passing) is the verified archive in this repo root: **`carcohort-source-203e6ab-codeonly.tar.gz.b64`**. SHA-256 of the decoded archive: `783954e11da7d2e6cb7d0764a8a431d3b5114229fd09b28e1757c3fa1f70aa45`.
->
-> Restore:
-> ```
-> base64 -d carcohort-source-203e6ab-codeonly.tar.gz.b64 > carcohort-source-203e6ab-codeonly.tar.gz
-> tar -xzf carcohort-source-203e6ab-codeonly.tar.gz -d carcohort
-> cd carcohort && npm install && npm run dev   # plus: node server/index.js
-> ```
->
-> This is a code-only archive: it excludes the hero image (`public/hero-carcohort.png`, ~2 MB, upload pending). `29-carcohort-source-3b78dfc.tar.gz` is an older snapshot kept for history; the archive above is newer and authoritative.
-
-
 **India's group vehicle-buying platform - working prototype.** Buying a car or bike in India is a negotiation you're set up to lose: one buyer has no leverage against a showroom. CarCohort groups buyers who want the same vehicle in the same city, tells dealerships *"20 ready buyers - what's your best on-road price?"*, and puts every competing offer side by side.
 
 Dealers get ready demand. Buyers get the leverage of twenty. Everyone keeps their own vehicle.
