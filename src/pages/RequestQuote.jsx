@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CITIES, carById, variantTiers, TYPE_META } from '../data.js';
 import { Badge, SectionHeading } from '../ui.jsx';
@@ -17,6 +17,8 @@ export default function RequestQuote() {
   const [deliveryBy, setDeliveryBy] = useState('');
   const [done, setDone] = useState(null);
   const [error, setError] = useState('');
+  // Bring the result into view (also scrolls the host page when embedded in an iframe).
+  useEffect(() => { if (done) { window.scrollTo(0, 0); document.getElementById('quote-saved')?.scrollIntoView({ block: 'center' }); } }, [done]);
 
   const models = useMemo(() => data.cars.filter((c) => c.type === type), [data.cars, type]);
   const car = carId ? carById(carId) : null;
@@ -50,7 +52,7 @@ export default function RequestQuote() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
           </div>
-          <h1 className="mt-5 font-display text-2xl font-extrabold text-brand-950">Quote request saved</h1>
+          <h1 id="quote-saved" className="mt-5 font-display text-2xl font-extrabold text-brand-950">Quote request saved</h1>
           <p className="mt-3 text-sm leading-relaxed text-slate-600">
             {c.name} · {variantTiers(c).find((v) => v.id === done.variant)?.label} · {done.city} ·
             budget {fmtINR(Number(done.budget))} · requested delivery by {fmtDate(done.deliveryBy)}.
