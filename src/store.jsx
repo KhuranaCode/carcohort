@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useMemo, useState, useCallback } 
 import { CARS, GROUPS } from './data.js';
 
 const KEY = 'carcohort-v1';
+let serverReservations = [];
+let applyRestore = () => {};
+function restoreMyReservations() { applyRestore(); }
 
 const initial = {
   user: null,          // { name, role: 'buyer' | 'dealer' }
@@ -22,6 +25,13 @@ async function api(path, opts) {
 }
 
 export function AppProvider({ children }) {
+  applyRestore = () => setState((s) => {
+    if (!s.user || !serverReservations.length) return s;
+    const mine = serverReservations.filter((r) => (r.name || '').toLowerCase() === s.user.name.toLowerCase());
+    const fresh = mine.filter((r) => !s.reservations[r.offerId]);
+    if (!fresh.length) return s;
+    return { ...s, reservations: { ...s.reservations, ...Object.fromEntries(fresh.map((r) => [r.offerId, { groupId: r.groupId, reservedAt: r.at }])) } };
+  });
   const [state, setState] = useState(() => {
     try {
       const raw = localStorage.getItem(KEY);
@@ -40,7 +50,13 @@ export function AppProvider({ children }) {
   useEffect(() => {
     let live = true;
     api('/api/bootstrap')
-      .then((b) => { if (live) { setData({ cars: b.cars, groups: b.groups }); setApiMode(true); } })
+      .then((b) => {
+        if (!live) return;
+        setData({ cars: b.cars, groups: b.groups, requests: b.requests || [] });
+        serverReservations = b.reservations || [];
+        restoreMyReservations();
+        setApiMode(true);
+      })
       .catch(() => { /* static demo mode: seed data, local-only */ });
     return () => { live = false; };
   }, []);
@@ -50,7 +66,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const api_ = useMemo(() => ({
-    signIn: (name, role) => setState((s) => ({ ...s, user: { name, role } })),
+    signIn: (name, role) => { setState((s) => ({ ...s, user: { name, role } })); setTimeout(restoreMyReservations, 0); },
     signOut: () => setState((s) => ({ ...s, user: null })),
 
     joinGroup: (id) => {
