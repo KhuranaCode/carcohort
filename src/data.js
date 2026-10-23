@@ -61,55 +61,55 @@ export const GROUPS = [
     id: 'creta-mumbai', carId: 'creta', city: 'Mumbai', members: 17, target: 20, invited: 6, deliveryBy: '2026-12-05',
     deadline: '2026-11-06', status: 'offers-live',
     offers: [
-      { id: 'o1', dealer: 'Shuban Hyundai - Powai', onRoad: 1698000, inclusions: ['1st year insurance free', '5-year extended warranty', 'Accessories kit worth Rs 15,000'], validTill: '2026-11-06', rating: 4.6, note: 'Priority delivery within 2 weeks of group close' },
-      { id: 'o2', dealer: 'Metro Hyundai - Andheri West', onRoad: 1715000, inclusions: ['RSA 3 years', 'Free 3 services', 'All-weather mats + boot liner'], validTill: '2026-11-06', rating: 4.4, note: 'Colour of choice guaranteed' },
-      { id: 'o3', dealer: 'Coastal Hyundai - Thane', onRoad: 1732000, inclusions: ['1st year insurance free', 'Ceramic coating'], validTill: '2026-10-29', rating: 4.2, note: '' },
+      { id: 'o1', variant: 'SX(O) Petrol DCT', dealer: 'Shuban Hyundai - Powai', onRoad: 1698000, inclusions: ['1st year insurance free', '5-year extended warranty', 'Accessories kit worth Rs 15,000'], validTill: '2026-11-06', rating: 4.6, note: 'Priority delivery within 2 weeks of group close' },
+      { id: 'o2', variant: 'SX Tech Petrol IVT', dealer: 'Metro Hyundai - Andheri West', onRoad: 1715000, inclusions: ['RSA 3 years', 'Free 3 services', 'All-weather mats + boot liner'], validTill: '2026-11-06', rating: 4.4, note: 'Colour of choice guaranteed' },
+      { id: 'o3', variant: 'SX Diesel MT', dealer: 'Coastal Hyundai - Thane', onRoad: 1732000, inclusions: ['1st year insurance free', 'Ceramic coating'], validTill: '2026-10-29', rating: 4.2, note: '' },
     ],
   },
   {
     id: 'nexon-pune', carId: 'nexon', city: 'Pune', members: 12, target: 15, invited: 5, deliveryBy: '2026-11-28',
     deadline: '2026-10-27', status: 'closing-soon',
     offers: [
-      { id: 'o4', dealer: 'Bafna Tata - Baner', onRoad: 1305000, inclusions: ['Free PDI + doorstep delivery', 'Rs 8,000 fuel voucher', 'Mud flaps + mats'], validTill: '2026-10-27', rating: 4.5, note: 'Best for immediate delivery' },
-      { id: 'o5', dealer: 'Pandit Tata - Wakad', onRoad: 1318000, inclusions: ['1st year insurance free', 'Extended warranty 4 yrs'], validTill: '2026-10-27', rating: 4.3, note: '' },
+      { id: 'o4', variant: 'Fearless+ Petrol DCA', dealer: 'Bafna Tata - Baner', onRoad: 1305000, inclusions: ['Free PDI + doorstep delivery', 'Rs 8,000 fuel voucher', 'Mud flaps + mats'], validTill: '2026-10-27', rating: 4.5, note: 'Best for immediate delivery' },
+      { id: 'o5', variant: 'Creative+ Petrol MT', dealer: 'Pandit Tata - Wakad', onRoad: 1318000, inclusions: ['1st year insurance free', 'Extended warranty 4 yrs'], validTill: '2026-10-27', rating: 4.3, note: '' },
     ],
   },
   {
     id: 'swift-delhi', carId: 'swift', city: 'Delhi NCR', members: 21, target: 25, invited: 7, deliveryBy: '2026-12-10',
     deadline: '2026-11-12', status: 'offers-live',
     offers: [
-      { id: 'o6', dealer: 'Prem Motors Maruti - Gurugram', onRoad: 871000, inclusions: ['Zero handling charges', 'Free accessories combo', '1st service labour free'], validTill: '2026-11-12', rating: 4.5, note: '' },
-      { id: 'o7', dealer: 'Dhingra Maruti - Noida', onRoad: 883000, inclusions: ['1st year insurance free', 'Body cover + mats'], validTill: '2026-11-12', rating: 4.1, note: '' },
+      { id: 'o6', variant: 'ZXi+ AMT', dealer: 'Prem Motors Maruti - Gurugram', onRoad: 871000, inclusions: ['Zero handling charges', 'Free accessories combo', '1st service labour free'], validTill: '2026-11-12', rating: 4.5, note: '' },
+      { id: 'o7', variant: 'ZXi Petrol MT', dealer: 'Dhingra Maruti - Noida', onRoad: 883000, inclusions: ['1st year insurance free', 'Body cover + mats'], validTill: '2026-11-12', rating: 4.1, note: '' },
     ],
   },
   {
     id: 'thar-chandigarh', carId: 'thar', city: 'Chandigarh', members: 9, target: 15, invited: 3, deliveryBy: '2026-12-20',
     deadline: '2026-11-18', status: 'forming',
     offers: [
-      { id: 'o8', dealer: 'Tricity Mahindra - Mohali', onRoad: 1535000, inclusions: ['Free 4x4 off-road experience day', 'Accessories voucher Rs 10,000'], validTill: '2026-11-18', rating: 4.4, note: 'Early-bird offer, improves at 15 buyers' },
+      { id: 'o8', variant: 'LX 4x4 Diesel AT', dealer: 'Tricity Mahindra - Mohali', onRoad: 1535000, inclusions: ['Free 4x4 off-road experience day', 'Accessories voucher Rs 10,000'], validTill: '2026-11-18', rating: 4.4, note: 'Early-bird offer, improves at 15 buyers' },
     ],
   },
   {
     id: 'city-bengaluru', carId: 'city', city: 'Bengaluru', members: 14, target: 18, invited: 5, deliveryBy: '2026-12-08',
     deadline: '2026-11-09', status: 'offers-live',
     offers: [
-      { id: 'o9', dealer: 'Dakshin Honda - Whitefield', onRoad: 1579000, inclusions: ['Corporate discount extended', 'Free 2 services', 'Window sunshades'], validTill: '2026-11-09', rating: 4.6, note: '' },
-      { id: 'o10', dealer: 'Magnum Honda - Hebbal', onRoad: 1592000, inclusions: ['1st year insurance free', 'RSA 1 year'], validTill: '2026-11-09', rating: 4.3, note: '' },
+      { id: 'o9', variant: 'ZX Petrol CVT', dealer: 'Dakshin Honda - Whitefield', onRoad: 1579000, inclusions: ['Corporate discount extended', 'Free 2 services', 'Window sunshades'], validTill: '2026-11-09', rating: 4.6, note: '' },
+      { id: 'o10', variant: 'V Petrol MT', dealer: 'Magnum Honda - Hebbal', onRoad: 1592000, inclusions: ['1st year insurance free', 'RSA 1 year'], validTill: '2026-11-09', rating: 4.3, note: '' },
     ],
   },
   {
     id: 'punch-mumbai', carId: 'punch', city: 'Mumbai', members: 6, target: 15, invited: 2, deliveryBy: '2026-12-22',
     deadline: '2026-11-21', status: 'forming',
     offers: [
-      { id: 'o11', dealer: 'Lakozy Tata - Malad', onRoad: 889000, inclusions: ['Free PDI report shared with group', 'Mats + mud flaps'], validTill: '2026-11-21', rating: 4.2, note: 'Opens bidding - more dealers join as group grows' },
+      { id: 'o11', variant: 'Accomplished Petrol AMT', dealer: 'Lakozy Tata - Malad', onRoad: 889000, inclusions: ['Free PDI report shared with group', 'Mats + mud flaps'], validTill: '2026-11-21', rating: 4.2, note: 'Opens bidding - more dealers join as group grows' },
     ],
   },
   {
     id: 'xuv700-delhi', carId: 'xuv700', city: 'Delhi NCR', members: 11, target: 15, invited: 4, deliveryBy: '2026-12-15',
     deadline: '2026-11-15', status: 'offers-live',
     offers: [
-      { id: 'o12', dealer: 'Sahib Mahindra - Faridabad', onRoad: 2199000, inclusions: ['5-year extended warranty', 'Free ceramic coating', 'RSA 3 years'], validTill: '2026-11-15', rating: 4.5, note: '' },
-      { id: 'o13', dealer: 'Vegas Mahindra - Ghaziabad', onRoad: 2218000, inclusions: ['1st year insurance free', '7D mats'], validTill: '2026-11-15', rating: 4.2, note: '' },
+      { id: 'o12', variant: 'AX7 Diesel AT', dealer: 'Sahib Mahindra - Faridabad', onRoad: 2199000, inclusions: ['5-year extended warranty', 'Free ceramic coating', 'RSA 3 years'], validTill: '2026-11-15', rating: 4.5, note: '' },
+      { id: 'o13', variant: 'AX5 Select Petrol AT', dealer: 'Vegas Mahindra - Ghaziabad', onRoad: 2218000, inclusions: ['1st year insurance free', '7D mats'], validTill: '2026-11-15', rating: 4.2, note: '' },
     ],
   },
   {
@@ -121,7 +121,7 @@ export const GROUPS = [
     id: 'innova-mumbai', carId: 'innova', city: 'Mumbai', members: 13, target: 15, invited: 4, deliveryBy: '2026-12-01',
     deadline: '2026-10-29', status: 'closing-soon',
     offers: [
-      { id: 'o14', dealer: 'Shree Toyota - Borivali', onRoad: 2599000, inclusions: ['Priority allocation', 'Free 3 services', 'Genuine accessories 20% off'], validTill: '2026-10-29', rating: 4.7, note: 'Waiting period waiver for group members' },
+      { id: 'o14', variant: 'ZX 2.4 Diesel AT', dealer: 'Shree Toyota - Borivali', onRoad: 2599000, inclusions: ['Priority allocation', 'Free 3 services', 'Genuine accessories 20% off'], validTill: '2026-10-29', rating: 4.7, note: 'Waiting period waiver for group members' },
     ],
   },
 ];
