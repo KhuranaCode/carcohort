@@ -121,7 +121,9 @@ test('unmatched request actually creates a new group (exact variant/budget/date 
   // and it can receive dealer offers like any other group
   const o = await fetch(`${base}/api/groups/${body.groupId}/offers`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ dealer: 'Test Honda', onRoad: 98000, inclusions: [], validTill: '2026-12-01' }),
+    body: JSON.stringify({ dealer: 'Test Honda', variant: 'DLX Drum', onRoad: 98000, inclusions: [], validTill: '2026-12-01' }),
   });
   assert.equal(o.status, 201);
+  const ob = await o.json();
+  assert.equal(ob.offer.variant, 'DLX Drum');
 });
