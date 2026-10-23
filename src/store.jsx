@@ -78,7 +78,7 @@ export function AppProvider({ children }) {
         return api(`/api/groups/${groupId}/offers`, {
           method: 'POST',
           body: JSON.stringify({
-            dealer: offer.dealer, onRoad: offer.onRoad,
+            dealer: offer.dealer, onRoad: offer.onRoad, variant: offer.variant,
             inclusions: offer.inclusions, validTill: offer.validTill, note: offer.note,
           }),
         }).then((r) => {
