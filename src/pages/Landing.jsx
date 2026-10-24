@@ -1,18 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { CITIES, savingsVsEstimate, carById, bestOffer } from '../data.js';
-import { HorizontalJourney, Reveal, CountUp, Rail, useMagnetic, prefersReducedMotion } from '../cinematic.jsx';
-import { ConceptStage, Shots, Featured, Craft } from '../showcase.jsx';
-import Atmosphere from '../three/Atmosphere.jsx';
-
-gsap.registerPlugin(ScrollTrigger);
+import { Reveal, CountUp, prefersReducedMotion } from '../cinematic.jsx';
+import { ConceptStage } from '../showcase.jsx';
 import { useApp } from '../store.jsx';
 import { PHOTOS, CREDITS, SHOWN } from '../photos.js';
-import { SectionHeading, Countdown, ProgressBar, Badge, CarPhoto } from '../ui.jsx';
 import { fmtINR } from '../utils.js';
-import { GroupCard } from './Groups.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FAQS = [
   { q: 'Is a discount guaranteed if I join a group?', a: 'No. Group buying gives dealers a reason to compete, and that usually produces better offers than a solo walk-in - but the final discount always depends on the actual offers dealers make. We show you every offer transparently and you decide. If no offer is worth it, you walk away free of charge.' },
@@ -24,111 +21,487 @@ const FAQS = [
 ];
 
 const STEPS = [
-  { n: '01', t: 'Pick your vehicle and city', d: 'Tell us which model you want and where you will register it. Browse live groups or start a new one in seconds.' },
-  { n: '02', t: 'Join the buyer group', d: 'You join other buyers who want the same car in your city. Joining is free and non-binding - it simply adds your name to the buyer count dealers see.' },
-  { n: '03', t: 'Dealers compete for the group', d: 'We take the group to partner dealerships: "20 ready buyers - what is your best on-road price?" Dealers bid against each other, not against you.' },
-  { n: '04', t: 'Compare, choose, buy - or walk away', d: 'Every offer lands as a final on-road price with inclusions listed. Pick the best one, do your PDI, and buy directly from the dealer. No obligation if nothing fits.' },
+  { t: 'Pick your vehicle and city', d: 'Tell us which model you want and where you will register it. Browse live groups or start a new one in seconds - cars, bikes, scooters and EVs.' },
+  { t: 'Join the buyer group', d: 'You join other buyers who want the same vehicle in your city. Joining is free and non-binding - it simply adds your name to the buyer count dealers see.' },
+  { t: 'Dealers compete for the group', d: 'We take the group to partner dealerships: "twenty ready buyers - what is your best on-road price?" Dealers bid against each other, not against you.' },
+  { t: 'Compare, choose, buy - or walk away', d: 'Every offer lands as a final on-road price with inclusions listed. Pick the best one, do your inspection, and buy directly from the dealer. No obligation if nothing fits.' },
 ];
 
-function Magnetic({ to, className, children, href }) {
-  const ref = useMagnetic();
-  return href
-    ? <a ref={ref} href={href} className={className}>{children}</a>
-    : <Link ref={ref} to={to} className={className}>{children}</Link>;
-}
+const REVIEWS = [
+  { stars: 5, text: 'Twelve of us wanted the same SUV in Pune. Watching three dealerships undercut each other in the open - that never happens inside a showroom.', name: 'Sample buyer story', meta: 'Fictional demo review · SUV group, Pune' },
+  { stars: 5, text: 'I walked in alone first and got one take-it-or-leave-it price. The group offer came back noticeably lower, with the accessories listed in writing.', name: 'Sample buyer story', meta: 'Fictional demo review · Sedan group, Delhi NCR' },
+  { stars: 5, text: 'The inspection checklist before registration is what sold me. VIN, manufacturing month, panel gaps - everything documented before money moved.', name: 'Sample buyer story', meta: 'Fictional demo review · EV group, Bengaluru' },
+];
 
-const cr = (k) => `${SHOWN[k]} · ${CREDITS[k].author} (${CREDITS[k].license})`;
-const img_hero = PHOTOS.thar, img_discover = PHOTOS.baleno, img_perf = PHOTOS.xuv700, img_lux = PHOTOS.innova, img_ev = PHOTOS['nexon-ev'], img_deal = PHOTOS.punch, img_group = PHOTOS.creta;
-const fmtCr = (n) => fmtINR(n);
-const carLine = (c) => `${fmtINR(c.exMin)} - ${fmtINR(c.exMax)} ex-showroom`;
-
-function Spec({ k, v }) {
+/* Deterministic torn ink edge (Sakura brush-cut between sections). */
+function Torn({ fill, flip = false, className = '' }) {
+  const pts = [0, 90, 210, 330, 470, 590, 720, 860, 990, 1130, 1260, 1390, 1440];
+  const ys = [22, 9, 19, 5, 16, 26, 8, 20, 4, 15, 24, 7, 14];
+  const d = `M0,34 L0,${ys[0]} ` + pts.map((x, i) => `L${x},${ys[i]}`).join(' ') + ` L1440,${ys[ys.length - 1]} L1440,34 Z`;
   return (
-    <div className="border-l border-white/20 pl-4" data-rise>
-      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">{k}</p>
-      <p className="mt-1 font-display text-xl font-extrabold text-white sm:text-2xl">{v}</p>
-    </div>
+    <svg viewBox="0 0 1440 34" preserveAspectRatio="none" className={`torn ${flip ? 'rotate-180' : ''} ${className}`} aria-hidden="true">
+      <path d={d} fill={fill} />
+    </svg>
   );
 }
 
-function ModelRow({ ids }) {
+function Callout({ children, className = '' }) {
+  return <p className={`callout ${className}`}><span className="line" />{children}</p>;
+}
+
+function Hero({ totalBuyers, groupCount }) {
+  const ref = useRef(null);
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = ref.current;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('.hero-line', { yPercent: 110, duration: 1.05, stagger: 0.14 }, 0.15)
+        .from('.hero-el', { y: 30, opacity: 0, duration: 0.85, stagger: 0.1 }, 0.7)
+        .fromTo('.hero-photo', { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power4.out' }, 0.35)
+        .fromTo('.hero-sweep', { xPercent: -130 }, { xPercent: 130, duration: 1.6, ease: 'power2.inOut' }, 0.9)
+        .from('.hero-callout', { opacity: 0, x: 24, duration: 0.7 }, 1.5);
+      gsap.to('.hero-photo-img', {
+        yPercent: -11, ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
+      });
+      gsap.to('.hero-copy', {
+        yPercent: 14, opacity: 0.25, ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom 30%', scrub: true },
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="mt-8 grid gap-3 sm:grid-cols-3" >
-      {ids.map((id, ix) => {
-        const c = carById(id);
-        return (
-          <Link key={id} to="/cars" className={`glass group rounded-xl p-4 transition hover:border-white/40 ${ix > 1 ? 'max-sm:hidden' : ''}`} data-rise>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-300">{c.body}</p>
-            <p className="mt-1 font-display text-lg font-extrabold text-white">{c.name}</p>
-            <p className="mt-2 text-xs text-white/70">{carLine(c)} (indicative demo)</p>
-          </Link>
-        );
-      })}
-    </div>
+    <section ref={ref} className="relative isolate overflow-hidden bg-paper" aria-label="CarCohort introduction">
+      <div className="container-x grid min-h-[var(--cc-vh,100svh)] items-center gap-10 pb-24 pt-32 lg:grid-cols-2 lg:gap-6 lg:pb-16">
+        <div className="hero-copy relative z-[2]">
+          <h1 className="font-display font-medium leading-[0.98] text-ink-900">
+            <span className="block overflow-hidden"><span className="hero-line block text-[13.5vw] font-bold sm:text-[9.5vw] lg:text-[5.6vw]">Your dream car.</span></span>
+            <span className="block overflow-hidden"><span className="hero-line block text-[13.5vw] font-bold text-brand-500 sm:text-[9.5vw] lg:text-[5.6vw]">Bought together.</span></span>
+            <span className="block overflow-hidden"><span className="hero-line mt-3 block max-w-xl text-[6.4vw] font-normal text-ink-900 sm:text-[4vw] lg:text-[2.1vw] lg:leading-[1.15]">- one group, dealers competing for your best on-road price</span></span>
+          </h1>
+          <div className="hero-el mt-9 flex flex-wrap gap-3">
+            <Link to="/cars" className="btn-ghost !px-8">Browse vehicles</Link>
+            <Link to="/groups" className="btn-primary !px-8">Find your group</Link>
+          </div>
+          <p className="hero-el mt-7 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+            <span>{groupCount} sample groups</span><span aria-hidden="true">·</span><span>{totalBuyers} sample buyers</span><span aria-hidden="true">·</span><span>Free to join</span>
+          </p>
+        </div>
+        <div className="relative">
+          <div className="hero-photo relative overflow-hidden rounded-[6px]" data-hover>
+            <img src={PHOTOS.thar} alt={`Mahindra Thar photograph (${SHOWN.thar})`} fetchpriority="high"
+              className="hero-photo-img aspect-[4/3] w-full scale-[1.12] object-cover" />
+            <div className="hero-sweep pointer-events-none absolute inset-0" aria-hidden="true" />
+          </div>
+          <Callout className="hero-callout absolute -bottom-5 right-2 sm:right-6">Mahindra Thar · 4 seats</Callout>
+          <p className="mt-8 text-[10px] leading-tight text-slate-600">
+            Photo: {SHOWN.thar} · {CREDITS.thar.author} ({CREDITS.thar.license}) · <Link className="underline" to="/credits">credits</Link>
+          </p>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute bottom-7 left-5 z-[2] flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 sm:left-8" aria-hidden="true">
+        Scroll down
+        <svg width="14" height="20" viewBox="0 0 14 20" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M7 1v16m0 0l-5-5m5 5l5-5" /></svg>
+      </div>
+      <p className="side-label pointer-events-none absolute bottom-24 right-4 z-[2] hidden text-[10px] font-bold uppercase text-slate-400 lg:block" aria-hidden="true">Group buying · India</p>
+    </section>
   );
 }
 
-function journeyPanels(groups, cars) {
+function Why() {
+  return (
+    <section className="bg-paper py-24 lg:py-32">
+      <div className="container-x max-w-4xl">
+        <Reveal>
+          <h2 className="font-display text-[9vw] font-medium leading-[1.06] text-ink-900 sm:text-6xl lg:text-7xl">
+            Why are you still <span className="serif-accent">negotiating alone</span> for your car?
+          </h2>
+        </Reveal>
+        <Reveal delay={120}>
+          <p className="mt-8 max-w-2xl text-base leading-[1.9] text-slate-600">
+            One buyer walking into a showroom has no leverage. Twenty buyers who want the exact same
+            vehicle in the same city are a conversation dealerships cannot ignore. CarCohort brings those
+            buyers together, takes the group to dealers, and puts every competing final on-road price
+            side by side - <strong className="text-ink-900">so the market works for you, not against you</strong>.
+          </p>
+        </Reveal>
+        <Reveal delay={200}>
+          <div className="mt-10"><a href="#how" className="btn-ghost">See how it works</a></div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Showcase() {
+  const ref = useRef(null);
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = ref.current;
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.showcase-img', { yPercent: 8, scale: 1.08 }, {
+        yPercent: -6, scale: 1, ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
+  return (
+    <section ref={ref} className="relative overflow-hidden bg-paper pb-8 pt-4 lg:pb-14" aria-label="Featured vehicle">
+      <div className="container-x relative">
+        <svg viewBox="0 0 900 420" className="pointer-events-none absolute -top-10 left-1/2 w-[130%] max-w-none -translate-x-1/2 opacity-[0.16] sm:w-[90%]" aria-hidden="true">
+          <path d="M40 210 Q120 90 300 110 T560 90 Q740 70 820 160 Q900 250 800 320 T520 360 Q340 390 200 340 T40 210 Z" fill="#3d3b36" />
+        </svg>
+        <Reveal className="relative">
+          <div className="mask-reveal overflow-hidden rounded-[6px]">
+            <img src={PHOTOS.xuv700} alt={`Mahindra XUV700 photograph (${SHOWN.xuv700})`} loading="lazy"
+              className="showcase-img aspect-[16/9] w-full object-cover sm:aspect-[21/9]" />
+          </div>
+          <Callout className="mt-4 justify-end">Mahindra XUV700 · 7 seats</Callout>
+          <p className="mt-2 text-right text-[10px] leading-tight text-slate-600">Photo: {SHOWN.xuv700} · {CREDITS.xuv700.author} ({CREDITS.xuv700.license})</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function About({ groupCount, totalBuyers, carCount }) {
+  return (
+    <section data-header-dark className="relative bg-ink-900 pb-24 pt-20 text-white lg:pb-32 lg:pt-24">
+      <Torn fill="#161616" className="absolute inset-x-0 top-0 -translate-y-full rotate-180" />
+      <div className="container-x grid gap-14 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <Reveal>
+            <h2 className="font-display text-[8.4vw] font-medium leading-[1.06] sm:text-5xl lg:text-6xl">
+              <span className="serif-accent font-bold">We help you</span> win your dream car at a fair, honest price
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mt-8 max-w-xl text-base leading-[1.9] text-white/70">
+              CarCohort is a group-buying concept built for India: buyers who want the same vehicle in the
+              same city join one group, and dealerships bid for the whole group at once. Every offer is a
+              final on-road price, in the open, next to its competition. This site is an interactive
+              prototype - every group, dealer, offer and price is fictional sample data.
+            </p>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="mt-10"><Link to="/groups" className="btn-ghost-light">See live sample groups</Link></div>
+          </Reveal>
+        </div>
+        <div className="lg:col-span-5">
+          <dl className="grid gap-10 sm:grid-cols-3 lg:grid-cols-1 lg:gap-14 lg:text-right">
+            {[
+              [<CountUp key="c" value={carCount} />, 'vehicles in the demo catalogue'],
+              [<CountUp key="g" value={groupCount} />, 'sample buying groups'],
+              [<CountUp key="b" value={totalBuyers} />, 'sample buyers grouped'],
+            ].map(([v, l], i) => (
+              <Reveal key={l} delay={i * 120}>
+                <dt className="order-2 mt-2 text-sm text-white/55">{l}</dt>
+                <dd className="order-1 font-display text-6xl font-medium leading-none lg:text-7xl">{v}</dd>
+              </Reveal>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Offer() {
+  const items = [
+    { t: 'Real catalogue', d: 'Nineteen vehicles Indian buyers actually cross-shop - each with a real, licensed photograph and indicative ex-showroom range.' },
+    { t: 'Open group bidding', d: 'Dealers see the group size and bid their best final on-road price. Every offer is visible next to its competition.' },
+    { t: 'Inspection first', d: 'Planned for launch: documented pre-delivery inspection and VIN verification before you accept any vehicle.' },
+    { t: 'Walk away free', d: 'Joining costs nothing and commits you to nothing. If no offer is worth it, the group expires and that is the end of it.' },
+  ];
+  return (
+    <section data-header-dark className="relative overflow-hidden bg-ink-900 py-24 text-white lg:py-32" aria-label="What CarCohort does">
+      <span className="bg-word text-[26vw]" aria-hidden="true">CARCOHORT</span>
+      <div className="container-x relative">
+        <Reveal className="mx-auto max-w-3xl text-center">
+          <h2 className="font-display text-[8.4vw] font-medium leading-[1.08] sm:text-5xl lg:text-6xl">Group buying - <span className="serif-accent font-bold">what we do</span></h2>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-[1.9] text-white/65">
+            Everything on CarCohort exists to do one thing: move the bargaining power from the showroom
+            floor to the buyer group.
+          </p>
+        </Reveal>
+        <div className="mt-16 grid gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((it, i) => (
+            <Reveal key={it.t} delay={i * 110} className="text-center">
+              <svg viewBox="0 0 40 40" className="mx-auto h-10 w-10" aria-hidden="true">
+                <circle cx="20" cy="20" r="8" fill="#e03e39" opacity="0.28" />
+                <circle cx="20" cy="20" r="4" fill="#e03e39" />
+              </svg>
+              <h3 className="mt-5 font-display text-2xl font-bold">{it.t}</h3>
+              <p className="mt-3 text-sm leading-[1.8] text-white/60">{it.d}</p>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Testimonials() {
+  const [i, setI] = useState(0);
+  const [fade, setFade] = useState(false);
+  const go = (n) => {
+    setFade(true);
+    setTimeout(() => { setI((n + REVIEWS.length) % REVIEWS.length); setFade(false); }, 320);
+  };
+  const r = REVIEWS[i];
+  return (
+    <section data-header-dark className="relative bg-brand-500 pb-24 pt-28 text-white lg:pb-32" aria-label="Buyer stories">
+      <Torn fill="#e03e39" className="absolute inset-x-0 top-0 -translate-y-full rotate-180" />
+      <span className="bg-word top-6 text-[24vw]" style={{ color: 'rgba(255,255,255,0.07)' }} aria-hidden="true">WHICH CAR?</span>
+      <div className="container-x relative -mt-40 mb-10 lg:-mt-48">
+        <Reveal>
+          <img src={PHOTOS.creta} alt={`Hyundai Creta photograph (${SHOWN.creta})`} loading="lazy"
+            className="mx-auto w-full max-w-3xl rounded-[6px] object-cover shadow-lift" />
+        </Reveal>
+        <p className="mx-auto mt-2 max-w-3xl text-[10px] leading-tight text-white/85">Photo: {SHOWN.creta} · {CREDITS.creta.author} ({CREDITS.creta.license})</p>
+      </div>
+      <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
+        <Reveal>
+          <h2 className="font-display text-[9vw] font-medium uppercase leading-[1.05] sm:text-5xl lg:text-6xl">What our<br />buyers say</h2>
+          <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/80">Every review below is fictional sample content inside this prototype - real buyer stories would live here after launch.</p>
+          <div className="mt-8 flex gap-3">
+            <button onClick={() => go(i - 1)} aria-label="Previous review" className="grid h-12 w-12 place-items-center rounded-full border border-white/60 transition hover:bg-white hover:text-brand-500">
+              <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 7H2m0 0l5-5M2 7l5 5" /></svg>
+            </button>
+            <button onClick={() => go(i + 1)} aria-label="Next review" className="grid h-12 w-12 place-items-center rounded-full border border-white/60 transition hover:bg-white hover:text-brand-500">
+              <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1 7h15m0 0l-5-5m5 5l-5 5" /></svg>
+            </button>
+          </div>
+        </Reveal>
+        <Reveal delay={140}>
+          <div className={`quote-slide border-l border-white/40 pl-8 ${fade ? 'out' : ''}`} aria-live="polite">
+            <div className="flex gap-1.5" aria-label={`${r.stars} out of 5 stars`}>
+              {Array.from({ length: r.stars }).map((_, s) => (
+                <svg key={s} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z" /></svg>
+              ))}
+            </div>
+            <blockquote className="mt-6 text-lg italic leading-[1.9] text-white/95">&ldquo;{r.text}&rdquo;</blockquote>
+            <p className="mt-6 font-display text-xl font-bold">{r.name}</p>
+            <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/70">{r.meta}</p>
+            <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.24em] text-white/60">{String(i + 1).padStart(2, '0')} / {String(REVIEWS.length).padStart(2, '0')}</p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Cities() {
+  return (
+    <section className="relative bg-paper py-16 lg:py-20" aria-label="Sample cities">
+      <Torn fill="#f2f1ed" className="absolute inset-x-0 top-0 -translate-y-full" />
+      <div className="container-x flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-center">
+        <span className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Live sample cities</span>
+        {CITIES.map((c) => (
+          <span key={c} className="flex items-center gap-2 font-display text-xl font-medium text-ink-900 sm:text-2xl">
+            <span className="h-2 w-2 rounded-full bg-brand-500" aria-hidden="true" />{c}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Process() {
+  const ref = useRef(null);
+  const bar = useRef(null);
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = ref.current;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(bar.current, { scaleY: 0 }, {
+        scaleY: 1, ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top 60%', end: 'bottom 80%', scrub: true },
+      });
+      el.querySelectorAll('.process-step').forEach((s) => {
+        gsap.from(s.querySelectorAll('.step-in'), {
+          y: 60, opacity: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08,
+          scrollTrigger: { trigger: s, start: 'top 72%', toggleActions: 'play none none reverse' },
+        });
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
+  return (
+    <section id="how" ref={ref} className="relative bg-paper py-24 lg:py-32" aria-label="How it works">
+      <div className="container-x grid gap-16 lg:grid-cols-12">
+        <div className="relative lg:col-span-5">
+          <div className="lg:sticky lg:top-32">
+            <Reveal>
+              <h2 className="font-display text-[8.6vw] font-medium leading-[1.06] text-ink-900 sm:text-5xl lg:text-6xl">
+                <span className="serif-accent font-bold">CarCohort</span> - help at every step of the purchase
+              </h2>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="mt-7 max-w-sm text-base leading-[1.9] text-slate-600">
+                Before your dream car reaches your driveway, the whole process covers four stages:
+              </p>
+            </Reveal>
+            <div className="mt-10 hidden h-40 w-px bg-slate-300 lg:block" aria-hidden="true">
+              <i ref={bar} className="block h-full w-[2px] origin-top bg-brand-500" />
+            </div>
+          </div>
+        </div>
+        <div className="lg:col-span-7">
+          {STEPS.map((s, i) => (
+            <div key={s.t} className="process-step flex min-h-[46vh] items-start gap-7 border-b border-dashed border-slate-300 py-14 first:pt-0 lg:min-h-[62vh] lg:gap-12">
+              <span className="step-in font-display text-[22vw] font-medium leading-[0.8] text-brand-500 sm:text-[9rem] lg:text-[11rem]">{i + 1}</span>
+              <div className="pt-4 lg:pt-10">
+                <h3 className="step-in font-display text-3xl font-bold leading-[1.1] text-brand-500 sm:text-4xl lg:text-[2.6rem]">{s.t}</h3>
+                <p className="step-in mt-6 max-w-md text-base leading-[1.9] text-slate-600">{s.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Popular() {
+  const picks = ['swift', 'thar', 'creta', 'nexon-ev', 'classic350', 'innova'];
+  return (
+    <section className="bg-paper pb-24 pt-4 lg:pb-32" aria-label="Popular vehicles">
+      <div className="container-x grid items-center gap-14 lg:grid-cols-2">
+        <Reveal>
+          <img src={PHOTOS.innova} alt={`Toyota Innova Crysta photograph (${SHOWN.innova})`} loading="lazy" className="w-full rounded-[6px] object-cover shadow-card" />
+          <p className="mt-2 text-[10px] leading-tight text-slate-600">Photo: {SHOWN.innova} · {CREDITS.innova.author} ({CREDITS.innova.license})</p>
+        </Reveal>
+        <div>
+          <Reveal>
+            <h2 className="font-display text-[8.6vw] font-medium leading-[1.06] text-ink-900 sm:text-5xl lg:text-6xl">
+              Models buyers are <span className="serif-accent font-bold">grouping right now</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <ul className="mt-10 space-y-4">
+              {picks.map((id) => {
+                const c = carById(id);
+                return (
+                  <li key={id}>
+                    <Link to={`/cars/${id}`} className="group flex items-baseline justify-between gap-4 border-b border-slate-200 pb-4">
+                      <span className="font-display text-2xl font-medium text-ink-900 underline decoration-brand-500/0 decoration-2 underline-offset-8 transition group-hover:text-brand-500 group-hover:decoration-brand-500 sm:text-3xl">{c.name}</span>
+                      <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{fmtINR(c.exMin)}+</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link to="/cars" className="btn-ghost">Full catalogue</Link>
+              <Link to="/request" className="btn-primary">Get a quote</Link>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GroupCards({ groups }) {
   const featured = [...groups].sort((a, b) => b.members / b.target - a.members / a.target).slice(0, 3);
-  return [
-    { id: 'discover', credit: cr('baleno'), kicker: 'Discover', image: img_discover, content: (
-      <div className="max-w-5xl">
-        <p className="kicker" data-rise>01 · Discover</p>
-        <h2 className="display-xl mt-4 text-[13vw] text-white sm:text-[9vw] lg:text-[7.4vw]" data-speed="0.6">Drive something<br /><span className="text-brand-400">different.</span></h2>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75" data-rise>Cars, bikes, scooters and EVs. Pick what you want, pick your city, and join other buyers who want the same thing.</p>
-      </div>) },
-    { id: 'power', credit: cr('xuv700'), kicker: 'Power & presence', image: img_perf, content: (
-      <div className="max-w-5xl">
-        <p className="kicker" data-rise>02 · Power</p>
-        <h2 className="display-xl mt-4 text-[11vw] text-white sm:text-[7vw] lg:text-[5.6vw]" data-speed="0.5">Built for the<br />open road.</h2>
-        <div className="mt-8 grid max-w-2xl grid-cols-3 gap-6"><Spec k="Vehicles in demo" v={cars.length} /><Spec k="Sample cities" v={CITIES.length} /><Spec k="Sample groups" v={groups.length} /></div>
-        <ModelRow ids={['thar', 'xuv700', 'creta']} />
-      </div>) },
-    { id: 'comfort', credit: cr('innova'), kicker: 'Everyday luxury', image: img_lux, content: (
-      <div className="max-w-5xl">
-        <p className="kicker" data-rise>03 · Comfort</p>
-        <h2 className="display-xl mt-4 text-[11vw] text-white sm:text-[7vw] lg:text-[5.6vw]" data-speed="0.5">Quiet, refined,<br />yours.</h2>
-        <p className="mt-5 max-w-xl text-white/75" data-rise>Sedans, MPVs and family SUVs. Every buyer still buys and owns their own car.</p>
-        <ModelRow ids={['city', 'hector', 'innova']} />
-      </div>) },
-    { id: 'electric', credit: cr('nexon-ev'), kicker: 'Electric future', image: img_ev, content: (
-      <div className="max-w-5xl">
-        <p className="kicker" data-rise>04 · Electric</p>
-        <h2 className="display-xl mt-4 text-[11vw] text-white sm:text-[7vw] lg:text-[5.6vw]" data-speed="0.5">Plug into<br />the group.</h2>
-        <p className="mt-5 max-w-xl text-white/75" data-rise>EV cars and scooters, grouped like any other vehicle. Prices are indicative demo figures, not live quotes.</p>
-        <ModelRow ids={['nexon-ev', 'ola-s1', 'ather-450']} />
-      </div>) },
-    { id: 'groups', credit: cr('creta'), kicker: 'Your next vehicle', image: img_group, content: (
-      <div className="max-w-6xl">
-        <p className="kicker" data-rise>05 · Your next vehicle</p>
-        <h2 className="display-xl mt-4 text-[11vw] text-white sm:text-[6vw] lg:text-[4.6vw]" data-speed="0.4">Pick a group. Join.<br />Let dealers compete.</h2>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {featured.map((g, gi) => {
-            const c = carById(g.carId); const best = bestOffer(g);
+  return (
+    <section className="bg-paper-deep py-24 lg:py-32" aria-label="Live sample groups">
+      <div className="container-x">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <Reveal>
+            <h2 className="max-w-xl font-display text-[8.6vw] font-medium leading-[1.06] text-ink-900 sm:text-5xl lg:text-6xl">
+              Groups dealers would <span className="serif-accent font-bold">bid on today</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={120}><Link to="/groups" className="btn-ghost">All {groups.length} sample groups</Link></Reveal>
+        </div>
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {featured.map((g, i) => {
+            const c = carById(g.carId);
+            const best = bestOffer(g);
             return (
-              <Link key={g.id} to={`/groups/${g.id}`} className={`glass group rounded-xl p-5 transition hover:border-white/40 ${gi > 1 ? 'max-md:hidden' : ''}`} data-rise>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-300">{g.city}</p>
-                <p className="mt-1 font-display text-xl font-extrabold text-white">{c.name}</p>
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/15"><div className="h-full bg-brand-500" style={{ width: `${Math.min(100, Math.round((g.members / g.target) * 100))}%` }} /></div>
-                <p className="mt-2 text-xs text-white/70">{g.members} of {g.target} buyers · {g.offers.length} offer{g.offers.length === 1 ? '' : 's'}</p>
-                <p className="mt-3 text-sm font-semibold text-white">{best ? `Lowest listed ${fmtINR(best.onRoad)} on-road` : 'Offers open as the group grows'}</p>
-                <span className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.18em] text-white group-hover:text-brand-300">View group →</span>
-              </Link>
+              <Reveal key={g.id} delay={i * 110}>
+                <Link to={`/groups/${g.id}`} className="card group flex h-full flex-col p-7 transition duration-300 hover:-translate-y-1.5 hover:shadow-lift">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-500">{g.city} · closes in {g.members >= g.target ? '0' : ''}{Math.max(1, Math.ceil((new Date(g.deadline) - Date.now()) / 86400000))} days</p>
+                  <h3 className="mt-3 font-display text-[1.65rem] font-bold leading-[1.15] text-ink-900">{c.name}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-500">{g.members} of {g.target} buyers joined · {g.offers.length} dealer offer{g.offers.length === 1 ? '' : 's'} so far.</p>
+                  <div className="mt-4 h-1 overflow-hidden rounded-full bg-slate-200"><div className="h-full bg-brand-500 transition-all" style={{ width: `${Math.min(100, Math.round((g.members / g.target) * 100))}%` }} /></div>
+                  <p className="mt-4 text-sm font-semibold text-ink-900">{best ? `Lowest listed ${fmtINR(best.onRoad)} on-road` : 'Offers open as the group grows'}</p>
+                  <span className="mt-auto pt-6 text-sm font-bold text-ink-900 transition group-hover:text-brand-500">View group <span aria-hidden="true">→</span></span>
+                </Link>
+              </Reveal>
             );
           })}
         </div>
-      </div>) },
-    { id: 'dealers', credit: cr('punch'), kicker: 'For dealers', image: img_deal, content: (
-      <div className="max-w-5xl">
-        <p className="kicker" data-rise>06 · Dealers</p>
-        <h2 className="display-xl mt-4 text-[11vw] text-white sm:text-[7vw] lg:text-[5.4vw]" data-speed="0.5">Your showroom,<br />a ready group.</h2>
-        <p className="mt-5 max-w-xl text-white/75" data-rise>Bid on groups of buyers who already know the exact vehicle and city. In this prototype, dealers and offers are fictional.</p>
-        <div className="mt-8 flex flex-wrap gap-3" data-rise>
-          <Magnetic to="/dealers" className="btn-accent !px-8 !py-4">See the dealer side</Magnetic>
-          <Magnetic to="/request" className="btn-ghost !px-8 !py-4">Request a quote</Magnetic>
+        <p className="mt-8 text-center text-xs text-slate-400">Fictional sample groups and offers - demonstration data only.</p>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  return (
+    <section className="bg-paper py-24 lg:py-32">
+      <div className="container-x max-w-3xl">
+        <Reveal className="text-center">
+          <h2 className="font-display text-[8.6vw] font-medium leading-[1.06] text-ink-900 sm:text-5xl">Honest answers, <span className="serif-accent font-bold">up front</span></h2>
+        </Reveal>
+        <div className="mt-12 space-y-3">
+          {FAQS.map((f, i) => (
+            <Reveal key={f.q} delay={i * 60}>
+              <details className="card group p-6 open:shadow-lift">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-lg font-bold text-ink-900">
+                  {f.q}
+                  <svg className="shrink-0 text-brand-500 transition group-open:rotate-180" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
+                </summary>
+                <p className="mt-3 text-sm leading-[1.85] text-slate-600">{f.a}</p>
+              </details>
+            </Reveal>
+          ))}
         </div>
-      </div>) },
-  ];
+      </div>
+    </section>
+  );
+}
+
+function Cta() {
+  return (
+    <section data-header-dark className="relative overflow-hidden bg-brand-500 pb-24 pt-24 text-white lg:pb-32 lg:pt-28" aria-label="Get started">
+      <Torn fill="#e03e39" className="absolute inset-x-0 top-0 -translate-y-full rotate-180" />
+      <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
+        <Reveal>
+          <h2 className="font-display text-[10vw] font-medium leading-[1.04] sm:text-6xl lg:text-7xl">How can we help?</h2>
+          <p className="mt-6 max-w-md text-base leading-[1.9] text-white/85">
+            Tell us the vehicle and the city. We will show you the group forming around it - or start one.
+            In this prototype the request is a demo and no dealer is contacted.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link to="/request" className="btn bg-ink-900 !px-9 !py-4 text-white hover:bg-ink-700">Request a quote</Link>
+            <Link to="/cars" className="btn-ghost-light !px-9 !py-4">Browse vehicles</Link>
+          </div>
+        </Reveal>
+        <Reveal delay={140} className="relative">
+          <svg viewBox="0 0 432 190" className="mx-auto w-full max-w-lg opacity-90" aria-hidden="true">
+            <path d="M104 80 L144 46 Q152 40 164 40 L262 40 Q274 40 282 52 L306 80 L326 88 Q344 94 344 112 L344 136 Q344 148 332 148 L96 148 Q84 148 84 136 L84 112 Q84 86 104 80 Z" fill="#161616" />
+            <rect x="160" y="54" width="52" height="30" rx="6" fill="#2e2e2e" />
+            <rect x="222" y="54" width="52" height="30" rx="6" fill="#2e2e2e" />
+            <circle cx="150" cy="140" r="24" fill="#161616" stroke="#f2f1ed" strokeOpacity="0.25" strokeWidth="3" /><circle cx="150" cy="140" r="10" fill="#3a3a3a" />
+            <circle cx="286" cy="140" r="24" fill="#161616" stroke="#f2f1ed" strokeOpacity="0.25" strokeWidth="3" /><circle cx="286" cy="140" r="10" fill="#3a3a3a" />
+            <rect x="96" y="98" width="18" height="8" rx="4" fill="#f2f1ed" opacity="0.8" />
+            <ellipse cx="214" cy="164" rx="180" ry="10" fill="#161616" opacity="0.5" />
+          </svg>
+          <p className="mt-6 text-center text-[11px] font-bold uppercase tracking-[0.3em] text-white/60">Buy together · own fully · walk away free</p>
+        </Reveal>
+      </div>
+    </section>
+  );
 }
 
 export default function Landing() {
@@ -136,305 +509,22 @@ export default function Landing() {
   const GROUPS = data.groups;
   const totalBuyers = GROUPS.reduce((a, g) => a + g.members, 0);
   const savings = GROUPS.map(savingsVsEstimate).filter((s) => s > 0);
-  const avgSaving = savings.length ? Math.round(savings.reduce((a, b) => a + b, 0) / savings.length / 1000) * 1000 : 0;
-  const panels = journeyPanels(GROUPS, data.cars);
-  const byPop = (t) => data.cars.filter(t);
-  const rails = [
-    ['Trending vehicles', byPop((c) => c.popular)],
-    ['Under Rs 12 lakh ex-showroom', byPop((c) => c.exMin < 1200000 && c.type === 'car')],
-    ['Electric revolution', byPop((c) => c.fuel === 'Electric')],
-    ['Two-wheelers', byPop((c) => c.type === 'bike' || c.type === 'scooter')],
-  ];
-  const heroRef = useRef(null);
-  const ctaA = useMagnetic();
-
-  const spec = (c) => [
-    ['Mileage', c.mileage],
-    c.ncap > 0 ? ['Safety (sample)', `${c.ncap}-star catalogue figure`] : ['Seats', String(c.seats)],
-    ['Ex-showroom', `${fmtINR(c.exMin)} - ${fmtINR(c.exMax)}`],
-  ];
-  const shot = (id, kicker, title, focus) => {
-    const c = carById(id);
-    return {
-      id, kicker, title, focus,
-      image: PHOTOS[id],
-      alt: `${c.name} photograph (${SHOWN[id]})`,
-      specs: spec(c),
-      link: { to: `/cars/${id}`, label: `See the ${c.name.replace(/^[A-Za-z]+ /, '')}` },
-      credit: `Photo: ${SHOWN[id]} - ${CREDITS[id].author} (${CREDITS[id].license}) - indicative demo specs`,
-    };
-  };
-  const shots = [
-    shot('thar', '01 · The stance', 'Presence, measured.'),
-    shot('creta', '02 · The detail', 'Every panel, inspected.', 'object-[68%_30%]'),
-    shot('seltos', '03 · The departure', 'Driven off. Owned fully.'),
-  ];
-  const featuredCars = ['thar', 'creta', 'nexon-ev'].map((id) => {
-    const c = carById(id);
-    return {
-      id: c.id, name: c.name, body: c.body, fuel: c.fuel,
-      chips: [c.mileage, c.ncap > 0 ? `${c.ncap}★ safety (sample)` : null, `${c.seats} seats`].filter(Boolean),
-      price: `${fmtINR(c.exMin)} - ${fmtINR(c.exMax)}`,
-      photo: PHOTOS[id],
-      photoAlt: `${c.name} photograph (${SHOWN[id]})`,
-      photoNote: `${SHOWN[id]} · ${CREDITS[id].author} (${CREDITS[id].license})`,
-    };
-  });
-  const craftRows = [
-    {
-      kicker: 'Design, documented', title: 'The exact photo, the exact licence',
-      body: "Every vehicle visual on CarCohort is a real photograph with its author, licence, generation and market disclosed. Where a photo shows an earlier generation or another market's car, the label says so - and where we hold no verified photo at all (Ather 450X), you see a labelled placeholder instead of a wrong car.",
-      image: PHOTOS.xuv700, alt: `Mahindra XUV700 photograph (${SHOWN.xuv700})`,
-      credit: `Photo: ${SHOWN.xuv700} · ${CREDITS.xuv700.author} (${CREDITS.xuv700.license})`,
-      link: { to: '/credits', label: 'Read the photo credits' },
-    },
-    {
-      kicker: 'Curated, not cluttered', title: '19 vehicles. Every price labelled indicative.',
-      body: 'Cars, bikes, scooters and EVs popular with Indian buyers - each carrying sample catalogue figures for ex-showroom range, mileage, safety and seating - indicative demo data, not certified or current ratings.',
-      image: PHOTOS.classic350, alt: `Royal Enfield Classic 350 photograph (${SHOWN.classic350})`,
-      credit: `Photo: ${SHOWN.classic350} · ${CREDITS.classic350.author} (${CREDITS.classic350.license})`,
-      link: { to: '/cars', label: 'Browse the catalogue' },
-    },
-  ];
-
-  // Hero choreography: curtain reveal, staggered headline, light sweep, scroll parallax.
-  useEffect(() => {
-    if (prefersReducedMotion()) return undefined;
-    const el = heroRef.current;
-    if (!el) return undefined;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.fromTo('.hero-img', { clipPath: 'inset(0% 0% 100% 0%)', scale: 1.22 }, { clipPath: 'inset(0% 0% 0% 0%)', scale: 1.06, duration: 1.7 }, 0.1)
-        .from('.hero-line', { y: 90, opacity: 0, duration: 1.1, stagger: 0.13 }, 0.55)
-        .from('.hero-el', { y: 34, opacity: 0, duration: 0.9, stagger: 0.09 }, 0.95)
-        .fromTo('.hero-sweep', { xPercent: -130 }, { xPercent: 130, duration: 1.6, ease: 'power2.inOut' }, 0.9);
-      gsap.to('.hero-img', {
-        yPercent: 12, scale: 1.14, ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
-      });
-    }, el);
-    return () => ctx.revert();
-  }, []);
-
+  void savings;
   return (
     <div>
-      {/* HERO - Scene A: cinematic opening */}
-      <section ref={heroRef} className="relative isolate flex min-h-[var(--cc-vh,100svh)] items-end overflow-hidden bg-ink-950 text-white">
-        <div className="hero-media absolute inset-0">
-          <img src={img_hero} alt="A black Mahindra Thar on wet tarmac (photo credit on the Credits page)" className="hero-img h-full w-full object-cover object-center" fetchpriority="high" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/40" />
-        <div className="hero-sweep pointer-events-none absolute inset-0" aria-hidden="true" />
-        <Atmosphere className="absolute inset-0" density={1} glow={0.5} />
-        <div className="grain" aria-hidden="true" />
-        <div className="container-x relative z-[2] pb-20 pt-40 lg:pb-24">
-          <p className="hero-el kicker">Group car buying · India</p>
-          <h1 className="display-xl mt-5 max-w-4xl text-[14vw] sm:text-[9vw] lg:text-[7.2vw]">
-            <span className="hero-line block">Buy together.</span>
-            <span className="hero-line block text-brand-400">Let dealers</span>
-            <span className="hero-line block">compete.</span>
-          </h1>
-          <p className="hero-el mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-            CarCohort groups buyers who want the same vehicle in the same city, then asks dealerships for their best final on-road price. Dealers compete. You compare. Everyone keeps their own vehicle.
-          </p>
-          <div className="hero-el mt-9 flex flex-wrap gap-3">
-            <Link ref={ctaA} to="/groups" className="btn-accent !px-8 !py-4 !text-base">Find your group</Link>
-            <a href="#journey" className="btn-ghost !px-8 !py-4 !text-base">Explore the journey</a>
-            <Link to="/cars" className="btn-ghost !px-8 !py-4 !text-base">Browse vehicles</Link>
-          </div>
-          <div className="hero-el mt-8 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
-            <span>Free for buyers</span><span>·</span><span>No obligation to buy</span><span>·</span><span>Savings never guaranteed</span>
-          </div>
-        </div>
-        <p className="absolute bottom-6 left-4 z-[2] max-w-[46vw] text-[10px] leading-tight text-white/55 sm:left-8">
-          Photo: {SHOWN.thar} · {CREDITS.thar.author} ({CREDITS.thar.license}) · <Link className="underline" to="/credits">credits</Link>
-        </p>
-        <div className="pointer-events-none absolute bottom-6 right-6 z-[2] hidden items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-white/60 md:flex" aria-hidden="true">
-          Scroll <span className="relative block h-12 w-px overflow-hidden bg-white/20"><i className="absolute inset-x-0 top-0 block h-5 bg-brand-500 [animation:ccdrop_1.8s_ease-in-out_infinite]" /></span>
-        </div>
-        <style>{`@keyframes ccdrop{0%{transform:translateY(-100%)}100%{transform:translateY(260%)}}`}</style>
-      </section>
-
-      {/* SIGNATURE JOURNEY */}
-      <HorizontalJourney panels={panels} label="CarCohort scenes" />
-      <span id="after-journey" tabIndex={-1} />
-
-      {/* Scene C: scroll-driven shot sequence through the real photo set */}
+      <Hero totalBuyers={totalBuyers} groupCount={GROUPS.length} />
+      <Why />
+      <Showcase />
+      <About groupCount={GROUPS.length} totalBuyers={totalBuyers} carCount={data.cars.length} />
+      <Offer />
+      <Testimonials />
+      <Cities />
+      <Process />
+      <Popular />
+      <GroupCards groups={GROUPS} />
       <ConceptStage />
-
-      <Shots shots={shots} />
-
-      {/* Scene D: featured vehicles -> detail pages */}
-      <Featured cars={featuredCars} />
-
-      {/* Scene E: craftsmanship, honestly labelled */}
-      <Craft rows={craftRows} />
-
-      {/* STATS (from demo dataset) */}
-      <section className="border-y border-white/10 bg-ink-950">
-        <div className="container-x grid grid-cols-2 gap-8 py-14 sm:grid-cols-4">
-          {[
-            [<CountUp key="a" value={GROUPS.length} />, 'sample groups (demo)'],
-            [<CountUp key="b" value={totalBuyers} />, 'sample buyers (demo)'],
-            [<CountUp key="c" value={CITIES.length} />, 'cities in demo'],
-            [<CountUp key="d" value={avgSaving} format={(n) => fmtINR(n)} />, 'sample avg. saving*'],
-          ].map(([v, l]) => (
-            <Reveal key={l} className="text-center">
-              <p className="font-display text-4xl font-extrabold text-white sm:text-5xl">{v}</p>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">{l}</p>
-            </Reveal>
-          ))}
-        </div>
-        <p className="container-x pb-6 text-center text-[11px] text-slate-400">*All figures on this page are illustrative sample data, computed from fictional demo groups. Savings are never guaranteed.</p>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how" className="container-x py-24">
-        <SectionHeading center kicker="How it works" title="Four steps between you and a fair price"
-          sub="Haggling alone for the 'best price' is tiring. Showing up as twenty ready buyers can change the conversation." />
-        <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 90} className="group bg-ink-900 p-7 transition hover:bg-ink-800">
-              <span className="font-display text-sm font-extrabold tracking-[0.2em] text-brand-400">{s.n}</span>
-              <h3 className="mt-4 text-lg font-extrabold text-white">{s.t}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{s.d}</p>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* CAROUSELS */}
-      <section className="border-t border-white/10 bg-ink-950 py-20">
-        <div className="container-x space-y-16">
-          <div>
-            <div className="flex items-end justify-between gap-4"><SectionHeading kicker="Live sample groups" title="Groups dealers would bid on" /></div>
-            <div className="mt-6">
-              <Rail label="Live sample groups">
-                {[...GROUPS].sort((a, b) => b.members / b.target - a.members / a.target).map((g) => <GroupCard key={g.id} group={g} />)}
-              </Rail>
-            </div>
-            <div className="mt-6"><Link to="/groups" className="btn-ghost">View all {GROUPS.length} sample groups</Link></div>
-          </div>
-          {rails.filter(([, list]) => list.length).map(([title, list]) => (
-            <div key={title}>
-              <h3 className="font-display text-2xl font-extrabold text-white">{title}</h3>
-              <div className="mt-4">
-                <Rail label={title}>
-                  {list.map((c) => (
-                    <Link key={c.id} to="/cars" className="card group overflow-hidden p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lift">
-                      <div className="overflow-hidden rounded-lg bg-gradient-to-br from-brand-50 to-ink-800 p-3"><CarPhoto car={c} className="mx-auto w-full" /></div>
-                      <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-300">{c.body} · {c.fuel}</p>
-                      <p className="mt-1 font-display text-lg font-extrabold text-white">{c.name}</p>
-                      <p className="mt-1 text-sm text-slate-600">{carLine(c)}</p>
-                    </Link>
-                  ))}
-                </Rail>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* NOT CAR SHARING */}
-      <section className="container-x py-20">
-        <div className="card grid items-center gap-10 overflow-hidden p-8 lg:grid-cols-2 lg:p-12">
-          <div>
-            <SectionHeading kicker="Yours, fully" title="Group price. Individual ownership."
-              sub="Fractional ownership apps split one car between strangers. CarCohort does the opposite: strangers team up to negotiate, then each drives home in their own brand-new car, registered in their own name." />
-            <ul className="mt-6 space-y-3">
-              {[
-                'You would buy from a partner dealership, invoice in your name',
-                'Standard manufacturer warranty, finance and exchange options apply',
-                'No co-owners, no usage calendars, no sharing ever',
-                'The group dissolves once everyone has their car',
-              ].map((t) => (
-                <li key={t} className="flex gap-3 text-sm text-slate-700">
-                  <svg className="mt-0.5 shrink-0 text-emerald-600" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <CarPhoto car={carById('creta')} className="w-full" />
-        </div>
-      </section>
-
-      {/* TRUST / PDI */}
-      <section className="bg-ink-900 py-20">
-        <div className="container-x">
-          <SectionHeading center kicker="Proposed trust features" title="How a group deal would stay safe"
-          sub="These are design commitments for a live launch - not verified operating processes yet." />
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { t: 'Pre-delivery inspection, documented', d: 'Planned: a full PDI checklist completed and shared before registration - panel gaps, paint, electronics, odometer, manufacturing date.' },
-              { t: 'VIN verified before you pay', d: 'Planned: the vehicle identification number shared with the buyer before delivery, so manufacturing month and year are known before money moves.' },
-              { t: 'Group visibility keeps dealers honest', d: 'The design goal: a dealer who slips a defective unit to one buyer loses twenty. Every group member would see the same inspection standard applied.' },
-            ].map((c) => (
-              <div key={c.t} className="card p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" /><path d="M9 12l2 2 4-4" /></svg>
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-brand-950">{c.t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{c.d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* BUSINESS MODEL */}
-      <section className="container-x py-20">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div>
-            <SectionHeading kicker="Proposed business model" title="Free for buyers. Worth it for dealers."
-              sub="The intended model: dealerships already spend on ads, brokers and walk-in discounts to move inventory, so a ready group of committed buyers is valuable to them. In a live launch they would pay a success fee per car delivered to a group member. No dealership is currently partnered." />
-          </div>
-          <div className="space-y-4">
-            {[
-              ['Buyers', '₹0 - joining, comparing and walking away are all free.'],
-              ['Dealers', 'Would pay a per-car success fee only when a group member takes delivery.'],
-              ['You keep', 'Every rupee of the negotiated saving. The on-road price would never be marked up.'],
-            ].map(([h, d]) => (
-              <div key={h} className="card flex gap-4 p-5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 font-display text-sm font-extrabold text-amber-700">{h[0]}</div>
-                <div><p className="font-bold text-brand-950">{h}</p><p className="text-sm text-slate-600">{d}</p></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="bg-ink-900 py-20">
-        <div className="container-x max-w-3xl">
-          <SectionHeading center kicker="Honest answers" title="Questions everyone asks" />
-          <div className="mt-10 space-y-3">
-            {FAQS.map((f) => (
-              <details key={f.q} className="card group p-5 open:shadow-lift">
-                <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-brand-950">
-                  {f.q}
-                  <svg className="shrink-0 text-slate-400 transition group-open:rotate-180" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="container-x py-20">
-        <div className="relative overflow-hidden rounded-xl bg-ink-800 ring-1 ring-white/10 px-8 py-14 text-center text-white lg:py-20">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-accent-500/25 blur-3xl" />
-          <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">Negotiating with a showroom alone is hard. Twenty ready buyers can change the conversation.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-600">Find your car, join your city's group, and let dealerships come to you with their best on-road price.</p>
-          <div className="mt-8 flex justify-center gap-3">
-            <Link to="/groups" className="btn-accent !px-8 !py-3.5 !text-base">Join a group - free</Link>
-            <Link to="/dealers" className="btn border border-white/25 !px-8 !py-3.5 !text-base text-white hover:bg-white/10">I am a dealer</Link>
-          </div>
-        </div>
-      </section>
+      <Faq />
+      <Cta />
     </div>
   );
 }
