@@ -92,7 +92,6 @@ export default function Cars() {
                   {c.popular && <Badge cls="bg-amber-100 text-amber-800">Popular</Badge>}
                 </div>
                 <p className="mt-1 text-xs text-slate-500">{TYPE_META[c.type]?.label} · {c.body} · {c.fuel}</p>
-                <p className="mt-1 text-xs text-slate-500">{c.mileage}{c.ncap > 0 ? ` · ${c.ncap}★ safety (sample)` : ''}</p>
                 <p className="mt-3 font-display text-lg font-extrabold text-brand-900">{fmtINR(c.exMin)} <span className="text-xs font-semibold text-slate-400">onwards, ex-showroom</span></p>
                 <div className="mt-auto flex gap-2 pt-4">
                   <Link to={`/cars/${c.id}`} className="btn-ghost flex-1 !py-2.5">Details</Link>
