@@ -87,8 +87,8 @@ export function ConceptStage() {
           <>
             <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_62%,#15161c_0%,#08080a_70%)]" />
             <ConceptCar progressRef={progressRef} autoSpin={!pinned} className="absolute inset-0" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/95 via-ink-950/55 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/85 via-transparent to-ink-950/40" />
+            <div className="pointer-events-none absolute inset-0 hidden lg:block bg-gradient-to-r from-ink-950/80 via-ink-950/20 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/90 via-transparent to-transparent lg:to-ink-950/20" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] px-6 pb-20 sm:px-12 lg:px-20 lg:pb-24">
               {CONCEPT_CAPS.map((c, i) => (
                 <div key={c.kicker} className={pinned ? 'concept-cap absolute bottom-20 left-6 right-6 max-w-2xl sm:left-12 lg:bottom-24 lg:left-20' : 'absolute bottom-24 left-6 right-6 max-w-2xl'} style={pinned ? undefined : { display: i === 0 ? 'block' : 'none' }}>
