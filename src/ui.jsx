@@ -1,115 +1,167 @@
 import { PHOTOS, CREDITS, SHOWN } from './photos.js';
 import gsap from 'gsap';
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from './store.jsx';
 import { daysLeft } from './utils.js';
 
 export function Logo({ light = false }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5">
-      <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="4" fill="#e50914" />
-        <path d="M14 38l4-10a6 6 0 0 1 5.5-3.5h17A6 6 0 0 1 46 28l4 10a4 4 0 0 1 2 3.2V46a2 2 0 0 1-2 2h-2.5a2 2 0 0 1-2-2v-1h-27v1a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2v-4.8a4 4 0 0 1 2-3.2z" fill="#fff" />
-        <circle cx="23" cy="44" r="4.5" fill="#e50914" stroke="#fff" strokeWidth="2" />
-        <circle cx="41" cy="44" r="4.5" fill="#e50914" stroke="#fff" strokeWidth="2" />
-      </svg>
-      <span className={`font-display text-lg font-extrabold uppercase tracking-[0.12em] text-white`}>
-        Car<span className="text-brand-400">Cohort</span>
+    <Link to="/" className="flex items-baseline gap-0.5" aria-label="CarCohort home">
+      <span className={`font-display text-[22px] font-bold uppercase leading-none tracking-[0.06em] ${light ? 'text-white' : 'text-ink-900'}`}>
+        Car<span className="text-brand-500">/</span>Cohort
       </span>
+      <span className={`ml-2 hidden text-[9px] font-bold uppercase tracking-[0.24em] sm:block ${light ? 'text-white/55' : 'text-slate-400'}`}>Group buying · India</span>
     </Link>
   );
 }
 
+const MENU_ITEMS = [
+  { to: '/', label: 'Start' },
+  { to: '/cars', label: 'Vehicles' },
+  { to: '/groups', label: 'Live groups' },
+  { to: '/compare', label: 'Compare' },
+  { to: '/dealers', label: 'For dealers' },
+  { to: '/request', label: 'Get a quote' },
+];
+
 export function Navbar() {
   const { state, signOut } = useApp();
   const nav = useNavigate();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
-  const linkCls = ({ isActive }) =>
-    `rounded-full px-3 py-2 text-[13px] font-semibold tracking-wide transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-600 hover:text-white'}`;
+  const [dark, setDark] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef(null);
+
+  // Sakura-style: header inverts over dark sections.
+  useEffect(() => {
+    const sections = [...document.querySelectorAll('[data-header-dark]')];
+    if (!sections.length) { setDark(false); return undefined; }
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      const hr = headerRef.current ? headerRef.current.getBoundingClientRect() : { top: 0, height: 76 };
+      const y = hr.top + hr.height / 2;
+      setDark(sections.some((s) => { const r = s.getBoundingClientRect(); return r.top <= y && r.bottom >= y; }));
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [pathname]);
+
+  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  const light = dark || open;
+  const dash = state.user?.role === 'dealer' ? '/dealer/dashboard' : '/dashboard';
+  const items = [...MENU_ITEMS.slice(0, 5), { to: dash, label: state.user?.role === 'dealer' ? 'Dealer dashboard' : 'My dashboard' }, MENU_ITEMS[5]];
+
   return (
-    <header className="sticky top-0 z-40 h-0 px-3 sm:px-6">
-      <div className="glass header-pill mx-auto mt-3 flex h-14 max-w-7xl items-center justify-between rounded-full px-4 sm:px-6">
-        <Logo />
-        <nav className="hidden items-center gap-1 md:flex">
-          <NavLink to="/cars" className={linkCls}>Vehicles</NavLink>
-          <NavLink to="/groups" className={linkCls}>Live groups</NavLink>
-          <NavLink to="/compare" className={linkCls}>Compare</NavLink>
-          <NavLink to="/dealers" className={linkCls}>For dealers</NavLink>
-          {state.user?.role === 'dealer'
-            ? <NavLink to="/dealer/dashboard" className={linkCls}>Dealer dashboard</NavLink>
-            : <NavLink to="/dashboard" className={linkCls}>My dashboard</NavLink>}
-        </nav>
-        <div className="hidden items-center gap-3 md:flex">
-          <Link to="/request" className="btn-accent !px-4 !py-2">Get a quote</Link>
-          {state.user ? (
-            <>
-              <span className="chip bg-white/10 text-slate-800">{state.user.role === 'dealer' ? 'Dealer' : 'Buyer'} · {state.user.name}</span>
-              <button className="btn-ghost !px-4 !py-2" onClick={() => { signOut(); nav('/'); }}>Sign out</button>
-            </>
-          ) : (
-            <Link to="/signin" className="btn-primary !px-4 !py-2">Sign in</Link>
-          )}
-        </div>
-        <button className="md:hidden rounded-full p-2 text-white" aria-expanded={open} onClick={() => setOpen(!open)} aria-label="Menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-        </button>
-      </div>
-      {open && (
-        <div className="glass mx-auto mt-2 max-w-7xl rounded-2xl md:hidden">
-          <div className="flex flex-col gap-1 p-3" onClick={() => setOpen(false)}>
-            <NavLink to="/cars" className={linkCls}>Vehicles</NavLink>
-            <NavLink to="/groups" className={linkCls}>Live groups</NavLink>
-            <NavLink to="/compare" className={linkCls}>Compare</NavLink>
-            <NavLink to="/dealers" className={linkCls}>For dealers</NavLink>
-            {state.user?.role === 'dealer'
-              ? <NavLink to="/dealer/dashboard" className={linkCls}>Dealer dashboard</NavLink>
-              : <NavLink to="/dashboard" className={linkCls}>My dashboard</NavLink>}
-            {state.user
-              ? <button className="btn-ghost mt-2" onClick={() => { signOut(); nav('/'); }}>Sign out ({state.user.name})</button>
-              : <Link to="/signin" className="btn-primary mt-2">Sign in</Link>}
+    <>
+      <header ref={headerRef} className={`fixed inset-x-0 top-9 transition-colors duration-300 sm:top-6 ${open ? 'z-[80]' : 'z-50'} ${scrolled && !open ? (light ? 'bg-ink-950/75 backdrop-blur-md' : 'bg-paper/85 backdrop-blur-md') : ''}`}>
+        <div className="container-x flex h-[76px] items-center justify-between">
+          <Logo light={light} />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav className={`hidden items-center gap-6 text-[13px] font-bold uppercase tracking-[0.14em] lg:flex ${light ? 'text-white/85' : 'text-ink-900'}`}>
+              <NavLink to="/cars" className="transition hover:text-brand-500">Vehicles</NavLink>
+              <NavLink to="/groups" className="transition hover:text-brand-500">Groups</NavLink>
+              <NavLink to="/compare" className="transition hover:text-brand-500">Compare</NavLink>
+            </nav>
+            {state.user ? (
+              <button onClick={() => { signOut(); nav('/'); }} className={`hidden rounded-full border px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] transition sm:block ${light ? 'border-white/40 text-white hover:bg-white hover:text-ink-900' : 'border-ink-900/40 text-ink-900 hover:bg-ink-900 hover:text-paper'}`}>
+                Sign out · {state.user.name}
+              </button>
+            ) : (
+              <Link to="/signin" className={`hidden rounded-full px-4 py-2 text-[12px] font-bold uppercase tracking-[0.12em] transition sm:block ${light ? 'text-white hover:text-brand-300' : 'text-ink-900 hover:text-brand-500'}`}>Sign in</Link>
+            )}
+            <Link to="/request" className={`hidden rounded-full px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] transition sm:block ${light ? 'bg-white text-ink-900 hover:bg-brand-500 hover:text-white' : 'bg-ink-900 text-paper hover:bg-brand-500 hover:text-white'}`}>Get a quote</Link>
+            <button
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              className={`flex items-center gap-2 rounded-full border px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] transition ${open ? 'z-[75] border-white/50 text-white hover:bg-white hover:text-ink-900' : dark ? 'border-white/50 text-white hover:bg-white hover:text-ink-900' : 'border-ink-900/50 text-ink-900 hover:bg-ink-900 hover:text-paper'}`}
+            >
+              {open ? 'Close' : 'Menu'}
+              {open
+                ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                : <svg width="16" height="12" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M2 2h20M2 9h20M2 16h20" /></svg>}
+            </button>
           </div>
         </div>
-      )}
-    </header>
+      </header>
+
+      {/* Sakura-style right slide-in menu panel */}
+      <div className={`menu-scrim ${open ? 'open' : ''}`} onClick={() => setOpen(false)} aria-hidden="true" />
+      <aside className={`menu-panel ${open ? 'open' : ''}`} aria-hidden={!open} aria-label="Site menu">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.10]">
+          <img src={PHOTOS.thar} alt="" className="h-full w-full object-cover" />
+        </div>
+        <div className="relative flex h-full flex-col justify-between px-8 pb-10 pt-28 sm:px-12">
+          <nav className="space-y-1">
+            {items.map((m, i) => (
+              <span key={m.to} className="menu-item block" style={{ transitionDelay: open ? `${120 + i * 60}ms` : '0ms' }}>
+                <NavLink to={m.to} className={({ isActive }) => `menu-link ${isActive ? 'active' : ''}`}>{m.label}</NavLink>
+              </span>
+            ))}
+            {state.user && (
+              <span className="menu-item block" style={{ transitionDelay: open ? `${120 + items.length * 60}ms` : '0ms' }}>
+                <button className="menu-link" onClick={() => { signOut(); setOpen(false); nav('/'); }}>Sign out</button>
+              </span>
+            )}
+          </nav>
+          <div className="menu-item space-y-4" style={{ transitionDelay: open ? `${200 + items.length * 60}ms` : '0ms' }}>
+            <Link to="/request" className="btn-primary w-full !py-4 !text-[13px]" onClick={() => setOpen(false)}>Request a group quote</Link>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">Interactive prototype · all data fictional</p>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="mt-20 border-t border-white/10 bg-ink-950 text-slate-600">
-      <div className="container-x grid gap-10 py-14 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <Logo light />
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
-            A group vehicle-buying prototype for India. It brings together buyers who want the
-            same vehicle in the same city, lets dealerships compete for the group, and puts
-            every final on-road price side by side.
+    <footer data-header-dark className="bg-ink-950 text-white/70">
+      <div className="container-x grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
+        <div className="lg:col-span-5">
+          <h2 className="font-display text-4xl font-medium leading-[1.05] text-white sm:text-5xl">
+            Your next car,<br /><span className="serif-accent">bought together.</span>
+          </h2>
+          <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/60">
+            A group vehicle-buying prototype for India. Buyers who want the same vehicle in the same city team up, dealerships compete for the group, and every final on-road price sits side by side.
           </p>
-          <span className="chip mt-4 bg-white/10 text-accent-300">Interactive prototype · all data fictional</span>
+          <span className="chip mt-6 border border-white/15 bg-white/5 text-accent-300">Interactive prototype · all data fictional</span>
         </div>
-        <div>
-          <h4 className="text-sm font-bold uppercase tracking-wider text-white">Product</h4>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li><Link className="hover:text-white" to="/cars">Browse vehicles</Link></li>
-            <li><Link className="hover:text-white" to="/groups">Live buying groups</Link></li>
-            <li><Link className="hover:text-white" to="/dealers">Partner with us</Link></li>
-            <li><Link className="hover:text-white" to="/dashboard">Buyer dashboard</Link></li>
-            <li><Link className="hover:text-white" to="/terms">Terms</Link></li>
-            <li><Link className="hover:text-white" to="/privacy">Privacy</Link></li>
-            <li><Link className="hover:text-white" to="/security">Security</Link></li>
-            <li><Link className="hover:text-white" to="/credits">Photo credits</Link></li>
+        <div className="lg:col-span-3">
+          <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">Navigate</h4>
+          <ul className="mt-5 space-y-2.5 text-sm">
+            <li><Link className="transition hover:text-brand-300" to="/cars">Browse vehicles</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/groups">Live buying groups</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/compare">Compare offers</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/dealers">Partner with us</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/dashboard">Buyer dashboard</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/request">Get a quote</Link></li>
           </ul>
         </div>
-        <div>
-          <h4 className="text-sm font-bold uppercase tracking-wider text-white">Company</h4>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li>Mumbai · Delhi NCR · Bengaluru · Pune · Chandigarh (sample cities)</li>
-            <li className="text-slate-500">Every buyer owns their own vehicle. No vehicle sharing, no fractional ownership.</li>
+        <div className="lg:col-span-2">
+          <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">Legal</h4>
+          <ul className="mt-5 space-y-2.5 text-sm">
+            <li><Link className="transition hover:text-brand-300" to="/terms">Terms</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/privacy">Privacy</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/security">Security</Link></li>
+            <li><Link className="transition hover:text-brand-300" to="/credits">Photo credits</Link></li>
           </ul>
+        </div>
+        <div className="lg:col-span-2">
+          <h4 className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">Sample cities</h4>
+          <p className="mt-5 text-sm leading-relaxed text-white/60">Mumbai · Delhi NCR · Bengaluru · Pune · Chandigarh</p>
+          <p className="mt-4 text-xs leading-relaxed text-white/40">Every buyer owns their own vehicle. No sharing, no fractional ownership.</p>
         </div>
       </div>
-      <div className="border-t border-white/10 py-5 text-center text-xs text-slate-500">
+      <div className="border-t border-white/10 py-5 text-center text-xs text-white/40">
         CarCohort prototype. Prices shown are indicative demo figures, not live dealer quotes.
       </div>
     </footer>
@@ -149,21 +201,20 @@ export function Countdown({ deadline }) {
   );
 }
 
-// Stylised car artwork per body type - cohesive illustration, not stock photos.
 export function CarPhoto({ car, className = '' }) {
   const src = car && PHOTOS[car.id];
   const c = car && CREDITS[car.id];
   if (!src) {
     return (
-      <div className={`flex aspect-[4/3] items-center justify-center rounded-xl border border-dashed border-white/15 bg-white/5 px-4 text-center text-xs text-slate-400 ${className}`}>
+      <div className={`flex aspect-[4/3] items-center justify-center rounded-[6px] border border-dashed border-ink-900/20 bg-paper-deep px-4 text-center text-xs text-slate-500 ${className}`}>
         {car ? `${car.name}: no verified, openly licensed photo yet` : 'Photo not available'}
       </div>
     );
   }
   return (
     <figure className={className}>
-      <img src={src} alt={`${car.name} photograph (see photo credits for the exact model year shown)`} loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />
-      <figcaption className="mt-1 text-[10px] leading-tight text-slate-500">
+      <img src={src} alt={`${car.name} photograph (see photo credits for the exact model year shown)`} loading="lazy" className="aspect-[4/3] w-full rounded-[6px] object-cover" />
+      <figcaption className="mt-1 inline-block rounded bg-paper px-2 py-1 text-[10px] leading-tight text-slate-600">
         Photo shows: {SHOWN[car.id]} · {c.author} · {c.license} · <Link className="underline" to="/credits">credits</Link>
       </figcaption>
     </figure>
@@ -174,13 +225,13 @@ export function CarArt({ body = 'SUV', type = 'car', className = '' }) {
   if (type === 'bike' || type === 'scooter' || body === 'Scooter' || body === 'Cruiser' || body === 'Commuter') {
     return (
       <svg viewBox="0 0 432 190" className={className} role="img" aria-label={`${body} illustration`}>
-        <ellipse cx="214" cy="162" rx="150" ry="10" fill="#ffffff" fillOpacity="0.07" />
+        <ellipse cx="214" cy="162" rx="150" ry="10" fill="#252525" fillOpacity="0.08" />
         <path d="M150 96 L190 60 Q196 54 206 54 L250 54 Q260 54 266 62 L292 96 L306 100 Q318 104 318 116 L318 126 L300 126 Q296 106 278 106 Q260 106 256 126 L180 126 Q176 106 158 106 Q140 106 136 126 L118 126 L118 116 Q118 102 134 98 Z" fill="url(#cg-bike)" />
-        <defs><linearGradient id="cg-bike" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#34343c" /><stop offset="100%" stopColor="#0e0e11" /></linearGradient></defs>
-        <rect x="196" y="60" width="46" height="16" rx="6" fill="#1d2a36" opacity="0.85" />
-        <circle cx="157" cy="130" r="22" fill="#050506" /><circle cx="157" cy="130" r="9" fill="#8d8d99" />
-        <circle cx="279" cy="130" r="22" fill="#050506" /><circle cx="279" cy="130" r="9" fill="#8d8d99" />
-        <rect x="112" y="106" width="14" height="7" rx="3.5" fill="#ff3b30" />
+        <defs><linearGradient id="cg-bike" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#dcdad2" /><stop offset="100%" stopColor="#b9b6ac" /></linearGradient></defs>
+        <rect x="196" y="60" width="46" height="16" rx="6" fill="#9fb6c4" opacity="0.85" />
+        <circle cx="157" cy="130" r="22" fill="#252525" /><circle cx="157" cy="130" r="9" fill="#918e84" />
+        <circle cx="279" cy="130" r="22" fill="#252525" /><circle cx="279" cy="130" r="9" fill="#918e84" />
+        <rect x="112" y="106" width="14" height="7" rx="3.5" fill="#e03e39" />
       </svg>
     );
   }
@@ -197,27 +248,27 @@ export function CarArt({ body = 'SUV', type = 'car', className = '' }) {
     <svg viewBox="0 0 432 190" className={className} role="img" aria-label={`${body} illustration`}>
       <defs>
         <linearGradient id={`cg-${body.replace(/\s/g, '')}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#34343c" /><stop offset="100%" stopColor="#0e0e11" />
+          <stop offset="0%" stopColor="#dcdad2" /><stop offset="100%" stopColor="#b9b6ac" />
         </linearGradient>
       </defs>
-      <ellipse cx="214" cy="162" rx="180" ry="12" fill="#ffffff" fillOpacity="0.07" />
+      <ellipse cx="214" cy="162" rx="180" ry="12" fill="#252525" fillOpacity="0.08" />
       <path d={path} fill={`url(#cg-${body.replace(/\s/g, '')})`} />
-      <path d={path} fill="none" stroke="#ff4d44" strokeOpacity="0.5" strokeWidth="2" />
-      <rect x="160" y="54" width="52" height="30" rx="6" fill="#1d2a36" opacity="0.85" />
-      <rect x="222" y="54" width="52" height="30" rx="6" fill="#1d2a36" opacity="0.85" />
-      <circle cx="150" cy="140" r="24" fill="#050506" /><circle cx="150" cy="140" r="11" fill="#8d8d99" />
-      <circle cx="286" cy="140" r="24" fill="#050506" /><circle cx="286" cy="140" r="11" fill="#8d8d99" />
-      <rect x="96" y="98" width="18" height="8" rx="4" fill="#ff3b30" />
+      <path d={path} fill="none" stroke="#e03e39" strokeOpacity="0.55" strokeWidth="2" />
+      <rect x="160" y="54" width="52" height="30" rx="6" fill="#9fb6c4" opacity="0.85" />
+      <rect x="222" y="54" width="52" height="30" rx="6" fill="#9fb6c4" opacity="0.85" />
+      <circle cx="150" cy="140" r="24" fill="#252525" /><circle cx="150" cy="140" r="11" fill="#918e84" />
+      <circle cx="286" cy="140" r="24" fill="#252525" /><circle cx="286" cy="140" r="11" fill="#918e84" />
+      <rect x="96" y="98" width="18" height="8" rx="4" fill="#e03e39" />
     </svg>
   );
 }
 
 export function Modal({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div className="card w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-bold text-brand-950">{title}</h3>
+          <h3 className="font-display text-xl font-bold text-ink-900">{title}</h3>
           <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
@@ -228,12 +279,12 @@ export function Modal({ title, onClose, children }) {
   );
 }
 
-export function SectionHeading({ kicker, title, sub, center = false }) {
+export function SectionHeading({ kicker, title, sub, center = false, dark = false }) {
   return (
     <div className={`${center ? 'text-center mx-auto' : ''} max-w-2xl`}>
       <p className="kicker">{kicker}</p>
-      <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-5xl">{title}</h2>
-      {sub && <p className="mt-3 text-base leading-relaxed text-slate-600">{sub}</p>}
+      <h2 className={`mt-4 font-display text-4xl font-medium leading-[1.04] sm:text-5xl ${dark ? 'text-white' : 'text-ink-900'}`}>{title}</h2>
+      {sub && <p className={`mt-4 text-base leading-relaxed ${dark ? 'text-white/65' : 'text-slate-500'}`}>{sub}</p>}
     </div>
   );
 }
