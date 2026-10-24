@@ -283,9 +283,12 @@ export function CompareView({ cars, groups, offline = false }) {
 }
 
 export default function Compare() {
-  const [data, setData] = useState(null); // { cars, groups, offline }
+  const [data, setData] = useState({ cars: CARS, groups: GROUPS, offline: true }); // seed view is immediate; API can replace it
 
   useEffect(() => {
+    // GitHub Pages is static: do not wait on an API that is not deployed.
+    if (window.location.hostname.endsWith('.github.io')) return undefined;
+    let live = true;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
     fetch('/api/bootstrap', { signal: ctrl.signal })
@@ -293,10 +296,10 @@ export default function Compare() {
         if (!r.ok) throw new Error(`bootstrap ${r.status}`);
         return r.json();
       })
-      .then((b) => setData({ cars: b.cars, groups: b.groups, offline: false }))
-      .catch(() => setData({ cars: CARS, groups: GROUPS, offline: true }))
+      .then((b) => { if (live && Array.isArray(b.cars) && Array.isArray(b.groups)) setData({ cars: b.cars, groups: b.groups, offline: false }); })
+      .catch(() => { if (live) setData({ cars: CARS, groups: GROUPS, offline: true }); })
       .finally(() => clearTimeout(timer));
-    return () => { ctrl.abort(); clearTimeout(timer); };
+    return () => { live = false; ctrl.abort(); clearTimeout(timer); };
   }, []);
 
   if (!data) {
