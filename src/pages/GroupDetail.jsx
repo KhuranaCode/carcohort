@@ -60,8 +60,8 @@ export default function GroupDetail() {
         <div className="grid lg:grid-cols-5">
           <div className="bg-gradient-to-br from-ink-700 to-ink-950 p-8 text-white lg:col-span-2">
             <div className="flex items-center gap-2"><Badge cls={meta.cls}>{meta.label}</Badge><Countdown deadline={group.deadline} /></div>
-            <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight">{car.name}</h1>
-            <p className="mt-1 text-slate-600">{car.body} · {car.fuel}{group.deliveryBy ? ` · requested delivery by ${fmtDate(group.deliveryBy)}` : ''}</p>
+            <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-white">{car.name}</h1>
+            <p className="mt-1 text-white/65">{car.body} · {car.fuel}{group.deliveryBy ? ` · requested delivery by ${fmtDate(group.deliveryBy)}` : ''}</p>
             <CarPhoto car={car} className="mx-auto mt-4 w-full max-w-sm" />
             <p className="mt-2 text-center text-xs text-slate-400">Ex-showroom {fmtINR(car.exMin)} - {fmtINR(car.exMax)} (indicative)</p>
           </div>
