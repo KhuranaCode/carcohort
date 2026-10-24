@@ -4,7 +4,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { CITIES, savingsVsEstimate, carById, bestOffer } from '../data.js';
 import { Reveal, CountUp, prefersReducedMotion } from '../cinematic.jsx';
-import { ConceptStage } from '../showcase.jsx';
 import { useApp } from '../store.jsx';
 import { PHOTOS, CREDITS, SHOWN } from '../photos.js';
 import { fmtINR } from '../utils.js';
@@ -522,7 +521,6 @@ export default function Landing() {
       <Process />
       <Popular />
       <GroupCards groups={GROUPS} />
-      <ConceptStage />
       <Faq />
       <Cta />
     </div>
