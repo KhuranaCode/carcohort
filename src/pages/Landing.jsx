@@ -174,7 +174,7 @@ function About({ groupCount, totalBuyers, carCount }) {
       <div className="container-x grid gap-14 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <Reveal>
-            <h2 className="font-display text-[8.4vw] font-medium leading-[1.06] sm:text-5xl lg:text-6xl">
+            <h2 className="font-display text-[8.4vw] font-medium leading-[1.06] text-white sm:text-5xl lg:text-6xl">
               <span className="serif-accent font-bold">We help you</span> win your dream car at a fair, honest price
             </h2>
           </Reveal>
@@ -221,7 +221,7 @@ function Offer() {
       <span className="bg-word text-[26vw]" aria-hidden="true">CARCOHORT</span>
       <div className="container-x relative">
         <Reveal className="mx-auto max-w-3xl text-center">
-          <h2 className="font-display text-[8.4vw] font-medium leading-[1.08] sm:text-5xl lg:text-6xl">Group buying - <span className="serif-accent font-bold">what we do</span></h2>
+          <h2 className="font-display text-[8.4vw] font-medium leading-[1.08] text-white sm:text-5xl lg:text-6xl">Group buying - <span className="serif-accent font-bold">what we do</span></h2>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-[1.9] text-white/65">
             Everything on CarCohort exists to do one thing: move the bargaining power from the showroom
             floor to the buyer group.
@@ -234,7 +234,7 @@ function Offer() {
                 <circle cx="20" cy="20" r="8" fill="#e03e39" opacity="0.28" />
                 <circle cx="20" cy="20" r="4" fill="#e03e39" />
               </svg>
-              <h3 className="mt-5 font-display text-2xl font-bold">{it.t}</h3>
+              <h3 className="mt-5 font-display text-2xl font-bold text-white">{it.t}</h3>
               <p className="mt-3 text-sm leading-[1.8] text-white/60">{it.d}</p>
             </Reveal>
           ))}
@@ -265,7 +265,7 @@ function Testimonials() {
       </div>
       <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
         <Reveal>
-          <h2 className="font-display text-[9vw] font-medium uppercase leading-[1.05] sm:text-5xl lg:text-6xl">What our<br />buyers say</h2>
+          <h2 className="font-display text-[9vw] font-medium uppercase leading-[1.05] text-white sm:text-5xl lg:text-6xl">What our<br />buyers say</h2>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/80">Every review below is fictional sample content inside this prototype - real buyer stories would live here after launch.</p>
           <div className="mt-8 flex gap-3">
             <button onClick={() => go(i - 1)} aria-label="Previous review" className="grid h-12 w-12 place-items-center rounded-full border border-white/60 transition hover:bg-white hover:text-brand-500">
@@ -476,7 +476,7 @@ function Cta() {
       <Torn fill="#e03e39" className="absolute inset-x-0 top-0 -translate-y-full rotate-180" />
       <div className="container-x relative grid items-center gap-12 lg:grid-cols-2">
         <Reveal>
-          <h2 className="font-display text-[10vw] font-medium leading-[1.04] sm:text-6xl lg:text-7xl">How can we help?</h2>
+          <h2 className="font-display text-[10vw] font-medium leading-[1.04] text-white sm:text-6xl lg:text-7xl">How can we help?</h2>
           <p className="mt-6 max-w-md text-base leading-[1.9] text-white/85">
             Tell us the vehicle and the city. We will show you the group forming around it - or start one.
             In this prototype the request is a demo and no dealer is contacted.
