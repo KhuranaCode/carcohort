@@ -117,9 +117,9 @@ export function sortRows(rows, key, dir) {
 function SortTh({ col, sortKey, dir, onSort }) {
   const active = sortKey === col.key;
   return (
-    <th className="py-3 pr-4" aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+    <th className="py-4 pr-7 last:pr-0" aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
       <button type="button" onClick={() => onSort(col.key)}
-        className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide ${active ? 'text-brand-800' : 'text-slate-400 hover:text-slate-600'}`}>
+        className={`inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-colors ${active ? 'text-ink-950' : 'text-slate-400 hover:text-slate-600'}`}>
         {col.label}
         <span aria-hidden="true" className="text-[10px]">{active ? (dir === 'asc' ? '▲' : '▼') : '↕'}</span>
       </button>
@@ -183,7 +183,7 @@ export function CompareView({ cars, groups, offline = false }) {
             {Object.entries(TYPE_META).map(([t, m]) => <option key={t} value={t}>{m.label}</option>)}
           </select>
         )}
-        {offline && <Badge cls="bg-amber-100 text-amber-800">Offline demo data - live server unreachable</Badge>}
+        {offline && <Badge cls="bg-amber-100 text-amber-800">Demo mode - sample data</Badge>}
         <span className="text-xs text-slate-400">{visible.length} offer{visible.length === 1 ? '' : 's'}</span>
       </div>
 
@@ -206,41 +206,87 @@ export function CompareView({ cars, groups, offline = false }) {
         </div>
       ) : (
         <>
-        <p className="mt-6 text-xs font-semibold text-brand-700 sm:hidden">Table scrolls sideways - swipe for total on-road price, inclusions and delivery terms →</p>
-        <div className="card mt-2 overflow-x-auto sm:mt-8">
-          <table className="w-full min-w-[1050px] text-left text-sm">
+        <div className="mt-8 flex items-center justify-between gap-3 md:hidden">
+          <label className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400" htmlFor="cmp-sort">Sort</label>
+          <select id="cmp-sort" className="input !w-auto" value={`${sortKey}:${dir}`}
+            onChange={(e) => { const [k, d] = e.target.value.split(':'); setSortKey(k); setDir(d); }}>
+            {COLUMNS.map((c) => (
+              <option key={`${c.key}:asc`} value={`${c.key}:asc`}>{c.label} - low to high</option>
+            ))}
+            {COLUMNS.map((c) => (
+              <option key={`${c.key}:desc`} value={`${c.key}:desc`}>{c.label} - high to low</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:hidden">
+          {visible.map((r) => (
+            <div key={r.key} className={`card p-5 ${r.expired ? 'opacity-55' : ''}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <Link to={`/groups/${r.groupId}`} className="font-semibold text-ink-950 hover:text-brand-700">{r.vehicle}</Link>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {r.variant ? r.variant : <Badge cls="bg-amber-100 text-amber-800">{UNCONFIRMED}</Badge>} · {r.city}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-display text-xl font-extrabold text-ink-950">{fmtINR(r.onRoad)}</p>
+                  <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">on-road</p>
+                </div>
+              </div>
+              {r.lowestListed && <Badge cls="mt-3 bg-emerald-100 text-emerald-800">Lowest listed · {r.variant}</Badge>}
+              {r.lowestListed && r.termsDiffer && (
+                <p className="mt-1.5 text-[11px] font-semibold text-amber-700">Inclusions differ across these {r.variant} offers - compare them too</p>
+              )}
+              <p className="mt-4 text-sm font-semibold text-ink-950">{r.dealer}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{r.rating > 0 ? `★ ${r.rating}` : 'New dealer'}{r.note ? ` · ${r.note}` : ''}</p>
+              {r.inclusions.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {r.inclusions.map((inc) => <Badge key={inc} cls="bg-slate-100 text-slate-700">{inc}</Badge>)}
+                </div>
+              )}
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                <span>Valid till <span className="font-semibold text-slate-700">{r.validTillIso ? fmtDate(r.validTillIso) : '-'}</span>{r.expired && <Badge cls="ml-2 bg-red-100 text-red-700">Expired</Badge>}</span>
+                <span>Delivery by <span className="font-semibold text-slate-700">{r.deliveryByIso ? fmtDate(r.deliveryByIso) : '-'}</span></span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="card mt-8 hidden overflow-x-auto px-7 md:block">
+          <table className="w-full min-w-[1020px] text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200">
+              <tr className="border-b-2 border-ink-950/10">
                 {COLUMNS.map((c) => <SortTh key={c.key} col={c} sortKey={sortKey} dir={dir} onSort={onSort} />)}
               </tr>
             </thead>
             <tbody>
               {visible.map((r) => (
-                <tr key={r.key} className={`border-b border-slate-100 align-top ${r.expired ? 'opacity-55' : ''}`}>
-                  <td className="py-4 pr-4">
-                    <p className="font-semibold text-brand-950">{r.dealer}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">{r.rating > 0 ? `★ ${r.rating}` : 'New dealer'}{r.note ? ` · ${r.note}` : ''}</p>
+                <tr key={r.key} className={`border-b border-slate-100 align-top transition-colors last:border-0 hover:bg-paper-deep/60 ${r.expired ? 'opacity-55' : ''}`}>
+                  <td className="py-5 pr-7">
+                    <p className="font-semibold text-ink-950">{r.dealer}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">{r.rating > 0 ? `★ ${r.rating}` : 'New dealer'}{r.note ? ` · ${r.note}` : ''}</p>
                   </td>
-                  <td className="py-4 pr-4">
-                    <Link to={`/groups/${r.groupId}`} className="font-semibold text-brand-700 hover:underline">{r.vehicle}</Link>
-                    <p className="mt-0.5 text-xs text-slate-400">{TYPE_META[r.type]?.label || r.type}</p>
+                  <td className="py-5 pr-7">
+                    <Link to={`/groups/${r.groupId}`} className="font-semibold text-ink-950 transition-colors hover:text-brand-700">{r.vehicle}</Link>
+                    <p className="mt-1 text-xs text-slate-400">{TYPE_META[r.type]?.label || r.type}</p>
                   </td>
-                  <td className="py-4 pr-4">
+                  <td className="py-5 pr-7">
                     {r.variant
-                      ? <span className="font-semibold text-slate-700">{r.variant}</span>
+                      ? <span className="font-medium text-slate-700">{r.variant}</span>
                       : <Badge cls="bg-amber-100 text-amber-800">{UNCONFIRMED}</Badge>}
                   </td>
-                  <td className="py-4 pr-4 text-slate-600">{r.city}</td>
-                  <td className="py-4 pr-4">
-                    <p className="font-display font-extrabold text-brand-900">{fmtINR(r.onRoad)}</p>
+                  <td className="whitespace-nowrap py-5 pr-7 text-slate-600">{r.city}</td>
+                  <td className="whitespace-nowrap py-5 pr-7">
+                    <p className="font-display text-lg font-extrabold text-ink-950">{fmtINR(r.onRoad)}</p>
                     {r.lowestListed && (
-                      <Badge cls="mt-1 bg-emerald-100 text-emerald-800">Lowest listed · {r.variant}</Badge>
+                      <Badge cls="mt-1.5 bg-emerald-100 text-emerald-800">Lowest listed · {r.variant}</Badge>
                     )}
                     {r.lowestListed && r.termsDiffer && (
-                      <p className="mt-1 text-[11px] font-semibold text-amber-700">Inclusions differ across these {r.variant} offers - compare them too</p>
+                      <p className="mt-1.5 max-w-[200px] text-[11px] font-semibold leading-snug text-amber-700">Inclusions differ across these {r.variant} offers - compare them too</p>
                     )}
                   </td>
-                  <td className="max-w-[220px] py-4 pr-4">
+                  <td className="max-w-[240px] py-5 pr-7">
                     {r.inclusions.length === 0 ? (
                       <span className="text-xs text-slate-400">None listed</span>
                     ) : (
@@ -250,11 +296,11 @@ export function CompareView({ cars, groups, offline = false }) {
                       </div>
                     )}
                   </td>
-                  <td className="py-4 pr-4">
+                  <td className="whitespace-nowrap py-5 pr-7">
                     {r.validTillIso ? <span className="text-slate-600">{fmtDate(r.validTillIso)}</span> : <span className="text-slate-400">-</span>}
                     {r.expired && <Badge cls="ml-2 bg-red-100 text-red-700">Expired</Badge>}
                   </td>
-                  <td className="py-4">
+                  <td className="whitespace-nowrap py-5">
                     {r.deliveryByIso ? <span className="text-slate-600">{fmtDate(r.deliveryByIso)}</span> : <span className="text-slate-400">-</span>}
                   </td>
                 </tr>
