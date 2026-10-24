@@ -7,7 +7,7 @@ export default function ForDealers() {
   const { state, data } = useApp();
   return (
     <div>
-      <section className="bg-ink-950 py-16 text-white">
+      <section className="bg-paper-deep py-16">
         <div className="container-x grid items-center gap-10 lg:grid-cols-2">
           <div>
             <Badge cls="bg-white/10 text-accent-300">For dealerships</Badge>
