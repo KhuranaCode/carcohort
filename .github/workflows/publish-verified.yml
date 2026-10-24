@@ -18,6 +18,7 @@ jobs:
           curl --fail --location --retry 2 https://github.com/sceneview/sceneview/releases/download/assets-v1/ferrari_f40.glb -o public/models/ferrari-f40/FerrariF40.glb
           echo 'a1ec281f1c219c049ecd07e4ef20c69d26c233b6270614743ca015a7f5713674  public/models/ferrari-f40/FerrariF40.glb' | sha256sum -c -
           git ls-files -z | python3 -c 'import sys,re,subprocess; files=[p for p in sys.stdin.buffer.read().decode().split("\0") if p and (re.search(r"(^|/)[0-9]+-",p) or p.startswith("public/models/carconcept/"))]; subprocess.run(["git","rm","-f","--"]+files,check=True) if files else None'
+          git checkout 964026c -- src/assets/photos
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add README.md package.json package-lock.json src public/models
