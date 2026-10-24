@@ -109,6 +109,7 @@ export default function ConceptCar({ progressRef, autoSpin = false, className = 
         // narrow (portrait) viewports: pull the camera back so the whole car fits
         const dist = Math.min(2.8, Math.max(1, 1.18 / camera.aspect));
         camera.position.set(5.6 * dist, 1.5 * Math.min(dist, 1.3), 6.1 * dist);
+        chase.intensity = 38 * Math.pow(dist, 1.7);
         camera.lookAt(0, 0.6, 0);
         camera.updateProjectionMatrix();
       };
