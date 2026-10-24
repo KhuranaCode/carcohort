@@ -4,13 +4,13 @@ function Page({ title, updated, children, credits }) {
   return (
     <section className="container-x max-w-3xl py-16">
       <span className="chip bg-white/10 text-accent-300">{credits ? 'Photo credits and licences' : 'Prototype notice - not a legal agreement'}</span>
-      <h1 className="mt-4 text-4xl font-extrabold text-white">{title}</h1>
-      <p className="mt-2 text-xs text-white/60">{credits ? `Photo list as of ${updated}.` : `Describes this build as of ${updated}. It is written from what the code actually does, not from legal advice.`}</p>
-      <div className="mt-8 space-y-6 text-sm leading-relaxed text-white/85 [&_a]:text-accent-300 [&_a]:underline [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-white [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
+      <h1 className="mt-4 text-4xl font-extrabold text-ink-900">{title}</h1>
+      <p className="mt-2 text-xs text-slate-500">{credits ? `Photo list as of ${updated}.` : `Describes this build as of ${updated}. It is written from what the code actually does, not from legal advice.`}</p>
+      <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-600 [&_a]:text-accent-300 [&_a]:underline [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-ink-900 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
         {children}
       </div>
-      <p className="mt-10 text-xs text-white/60">
-        <Link className="underline hover:text-white" to="/terms">Terms</Link> · <Link className="underline hover:text-white" to="/privacy">Privacy</Link> · <Link className="underline hover:text-white" to="/security">Security</Link> · <Link className="underline hover:text-white" to="/credits">Photo credits</Link>
+      <p className="mt-10 text-xs text-slate-500">
+        <Link className="underline hover:text-brand-500" to="/terms">Terms</Link> · <Link className="underline hover:text-brand-500" to="/privacy">Privacy</Link> · <Link className="underline hover:text-brand-500" to="/security">Security</Link> · <Link className="underline hover:text-brand-500" to="/credits">Photo credits</Link>
       </p>
     </section>
   );
@@ -110,7 +110,7 @@ export function Credits() {
       <p>The home-page turntable uses "Ferrari f40" by Black Snow, licensed CC-BY 4.0. <a className="underline" href="https://sketchfab.com/3d-models/ferrari-f40-52a66c41cfcd4f999fb1b1c49bf24d70" target="_blank" rel="noreferrer noopener">Original model and author</a>. Distributed via SceneView's open asset release. Runtime lighting and materials are adjusted. This is a licensed depiction of a production car, shown as a visual demo, not inventory or manufacturer endorsement. Rendered with three.js (MIT licence).</p>
       <ul>
         {Object.entries(CREDITS).map(([k, c]) => (
-          <li key={k}><b className="text-white">{SHOWN[k] || k}</b>: "{c.title}" by {c.author}, {c.license}.{c.note ? <> <i>{c.note}</i></> : null} <a className="underline" href={c.page} target="_blank" rel="noreferrer noopener">Source page</a></li>
+          <li key={k}><b className="text-ink-900">{SHOWN[k] || k}</b>: "{c.title}" by {c.author}, {c.license}.{c.note ? <> <i>{c.note}</i></> : null} <a className="underline" href={c.page} target="_blank" rel="noreferrer noopener">Source page</a></li>
         ))}
       </ul>
     </Page>
