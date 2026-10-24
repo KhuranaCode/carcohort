@@ -72,8 +72,10 @@ export function ConceptStage() {
         },
       });
       caps.forEach((cap, i) => {
-        if (i > 0) tl.fromTo(cap, { autoAlpha: 0, y: 42 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power3.out' }, i);
-        if (i < caps.length - 1) tl.to(cap, { autoAlpha: 0, y: -42, duration: 0.45, ease: 'power3.in' }, i + 0.72);
+        // Sequential with a clean gap: the outgoing caption is fully gone
+        // before the incoming one starts (no overlapping headings).
+        if (i > 0) tl.fromTo(cap, { autoAlpha: 0, y: 42 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power3.out' }, i);
+        if (i < caps.length - 1) tl.to(cap, { autoAlpha: 0, y: -42, duration: 0.35, ease: 'power3.in' }, i + 0.55);
       });
       tl.to({}, { duration: 0.35 });
     }, el);
@@ -103,7 +105,7 @@ export function ConceptStage() {
                 </div>
               ))}
             </div>
-            <p className="absolute right-4 top-20 z-[4] rounded-full border border-white/15 bg-ink-950/70 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 backdrop-blur sm:right-8">
+            <p className="absolute right-4 top-28 z-[4] rounded-full border border-white/15 bg-ink-950/70 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 backdrop-blur sm:right-8">
               Ferrari F40 · licensed 3D demo · not inventory
             </p>
             <p className="absolute bottom-20 right-4 z-[4] hidden max-w-[240px] text-right text-[10px] leading-tight text-white/45 sm:right-8 md:block lg:bottom-24">
