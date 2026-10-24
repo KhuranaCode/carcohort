@@ -36,22 +36,22 @@ export default function CarDetail() {
   return (
     <div>
       {/* presentation hero */}
-      <section className="relative overflow-hidden bg-ink-950">
+      <section className="relative overflow-hidden bg-paper">
         <div className="container-x grid items-center gap-10 py-12 lg:grid-cols-[1.2fr_1fr] lg:py-16">
           <Reveal>
-            <div className="relative overflow-hidden rounded-2xl border border-white/10">
+            <div className="relative overflow-hidden rounded-2xl border border-ink-900/10">
               {photo ? (
                 <div className="mask-reveal">
                   <img src={photo} alt={`${car.name} photograph (${SHOWN[car.id]})`} className="aspect-[16/10] w-full object-cover" fetchpriority="high" />
                 </div>
               ) : (
-                <div className="flex aspect-[16/10] items-center justify-center border border-dashed border-white/15 bg-white/5 px-6 text-center text-sm text-slate-400">
+                <div className="flex aspect-[16/10] items-center justify-center border border-dashed border-ink-900/15 bg-paper-deep px-6 text-center text-sm text-slate-400">
                   {car.name}: no verified, openly licensed photo yet - shown as a labelled placeholder rather than the wrong car.
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-ink-950/60 to-transparent" />
               {photo && credit && (
-                <p className="absolute bottom-3 left-4 right-4 text-[10px] leading-tight text-white/65">
+                <p className="absolute bottom-3 left-4 right-4 rounded bg-ink-950/70 px-2 py-1.5 text-[10px] leading-tight text-white/90 backdrop-blur-sm">
                   Photo shows: {SHOWN[car.id]} · {credit.author} · {credit.license} · <Link className="underline" to="/credits">credits</Link>
                 </p>
               )}
@@ -59,24 +59,20 @@ export default function CarDetail() {
           </Reveal>
           <Reveal delay={100}>
             <p className="kicker">{TYPE_META[car.type]?.label} · {car.body}</p>
-            <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">{car.name}</h1>
+            <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">{car.name}</h1>
             <p className="mt-2 text-sm text-slate-500">{car.brand} · {car.fuel}</p>
             <p className="mt-5 font-display text-2xl font-extrabold text-brand-900">
               {fmtINR(car.exMin)} - {fmtINR(car.exMax)}
               <span className="ml-2 align-middle text-xs font-semibold text-slate-400">ex-showroom, indicative demo figures</span>
             </p>
-            <div className="mt-6 grid grid-cols-3 gap-4">
+            <div className="mt-6 grid grid-cols-2 gap-4">
               <div className="card !rounded-xl p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Mileage (sample)</p>
-                <p className="mt-1 font-display text-lg font-extrabold text-white">{car.mileage}</p>
-              </div>
-              <div className="card !rounded-xl p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Safety (sample)</p>
-                <p className="mt-1 font-display text-lg font-extrabold text-white">{car.ncap > 0 ? `${car.ncap}★ catalogue figure` : 'No sample figure'}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Fuel</p>
+                <p className="mt-1 font-display text-lg font-extrabold text-ink-900">{car.fuel}</p>
               </div>
               <div className="card !rounded-xl p-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Seats</p>
-                <p className="mt-1 font-display text-lg font-extrabold text-white">{car.seats}</p>
+                <p className="mt-1 font-display text-lg font-extrabold text-ink-900">{car.seats}</p>
               </div>
             </div>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -89,23 +85,23 @@ export default function CarDetail() {
       </section>
 
       {/* variant tiers + on-road estimator */}
-      <section className="border-t border-white/10 bg-ink-900 py-16">
+      <section className="border-t border-ink-900/10 bg-paper-deep py-16">
         <div className="container-x grid gap-10 lg:grid-cols-2">
           <Reveal>
             <SectionHeading kicker="Variants" title="Three indicative tiers"
               sub="Derived from the public ex-showroom range for this model. Actual variant names, features and prices differ by dealer and city." />
-            <div className="mt-8 overflow-hidden rounded-xl border border-white/10">
+            <div className="mt-8 overflow-hidden rounded-xl border border-ink-900/10">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-ink-800 text-xs uppercase tracking-wide text-slate-400">
+                  <tr className="border-b border-ink-900/10 bg-paper text-xs uppercase tracking-wide text-slate-400">
                     <th className="px-5 py-3">Tier</th>
                     <th className="px-5 py-3">Ex-showroom (indicative)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tiers.map((v) => (
-                    <tr key={v.id} className="border-b border-white/5 last:border-0">
-                      <td className="px-5 py-4 font-semibold text-white">{v.label}</td>
+                    <tr key={v.id} className="border-b border-ink-900/5 last:border-0">
+                      <td className="px-5 py-4 font-semibold text-ink-900">{v.label}</td>
                       <td className="px-5 py-4 font-display font-extrabold text-brand-900">{fmtINR(v.ex)}</td>
                     </tr>
                   ))}
@@ -124,7 +120,7 @@ export default function CarDetail() {
               <div className="mt-5 flex items-end justify-between">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Estimated on-road, mid tier</p>
-                  <p className="mt-1 font-display text-3xl font-extrabold text-white">{fmtINR(onRoad)}</p>
+                  <p className="mt-1 font-display text-3xl font-extrabold text-ink-900">{fmtINR(onRoad)}</p>
                 </div>
                 <Badge cls="bg-slate-100 text-slate-600">+{Math.round((CITY_UPLIFT[city] ?? 0.13) * 1000) / 10}% sample uplift</Badge>
               </div>
@@ -137,7 +133,7 @@ export default function CarDetail() {
       </section>
 
       {/* groups for this vehicle */}
-      <section className="border-t border-white/10 bg-ink-950 py-16">
+      <section className="border-t border-ink-900/10 bg-paper py-16">
         <div className="container-x">
           <SectionHeading kicker="Sample buying groups" title={`Groups forming for the ${car.name}`}
             sub="Fictional demo groups. Joining is free and non-binding; dealers would then bid a final on-road price for the whole group." />
@@ -155,11 +151,11 @@ export default function CarDetail() {
                   <Reveal key={g.id}>
                     <Link to={`/groups/${g.id}`} className="card group block p-6 transition hover:shadow-lift">
                       <div className="flex items-center justify-between">
-                        <p className="font-display text-lg font-extrabold text-white">{g.city}</p>
+                        <p className="font-display text-lg font-extrabold text-ink-900">{g.city}</p>
                         <Countdown deadline={g.deadline} />
                       </div>
                       <div className="mt-4"><ProgressBar value={g.members} max={g.target} /></div>
-                      <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-4">
+                      <div className="mt-4 flex items-end justify-between border-t border-ink-900/10 pt-4">
                         {best ? (
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Lowest listed (on-road)</p>
@@ -170,7 +166,7 @@ export default function CarDetail() {
                         {saving > 0 && <Badge cls="bg-emerald-100 text-emerald-800">Save {fmtINR(saving)}*</Badge>}
                       </div>
                       <p className="mt-3 text-[11px] text-slate-400">{g.offers.length} fictional offer{g.offers.length === 1 ? '' : 's'} · delivery target {fmtDate(g.deliveryBy)} · *indicative</p>
-                      <span className="mt-3 inline-block text-xs font-bold uppercase tracking-[0.18em] text-white group-hover:text-brand-300">View group →</span>
+                      <span className="mt-3 inline-block text-xs font-bold uppercase tracking-[0.18em] text-ink-900 group-hover:text-brand-300">View group →</span>
                     </Link>
                   </Reveal>
                 );
@@ -182,7 +178,7 @@ export default function CarDetail() {
 
       {/* related */}
       {related.length > 0 && (
-        <section className="border-t border-white/10 bg-ink-900 py-16">
+        <section className="border-t border-ink-900/10 bg-paper-deep py-16">
           <div className="container-x">
             <SectionHeading kicker="Keep looking" title="Similar vehicles" />
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -191,7 +187,7 @@ export default function CarDetail() {
                   {PHOTOS[c.id] && <img src={PHOTOS[c.id]} alt={`${c.name} photograph`} loading="lazy" className="aspect-[16/9] w-full object-cover transition duration-700 group-hover:scale-[1.04]" />}
                   <div className="p-5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-300">{c.body} · {c.fuel}</p>
-                    <p className="mt-1 font-display text-lg font-extrabold text-white">{c.name}</p>
+                    <p className="mt-1 font-display text-lg font-extrabold text-ink-900">{c.name}</p>
                     <p className="mt-1 text-sm text-slate-500">{fmtINR(c.exMin)} - {fmtINR(c.exMax)} ex-showroom</p>
                   </div>
                 </Link>
