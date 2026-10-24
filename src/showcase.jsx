@@ -81,7 +81,7 @@ export function ConceptStage() {
   }, [pinned, n]);
 
   return (
-    <section ref={root} className="relative border-t border-white/10 bg-ink-950" aria-label="Ferrari F40 production-car model, rendered live">
+    <section ref={root} data-header-dark className="relative bg-ink-950" aria-label="Ferrari F40 production-car model, rendered live">
       {(() => {
         const stage = (
           <>
@@ -97,7 +97,7 @@ export function ConceptStage() {
                   <p className="mt-4 max-w-xl text-sm leading-relaxed text-white sm:text-base" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.95)' }}>{c.sub}</p>
                   {i === n - 1 && pinned && (
                     <div className="pointer-events-auto mt-6">
-                      <Link to="/cars" className="btn-ghost !px-6 !py-3">Browse the real catalogue →</Link>
+                      <Link to="/cars" className="btn-ghost btn-ghost-light !px-6 !py-3">Browse the real catalogue →</Link>
                     </div>
                   )}
                 </div>

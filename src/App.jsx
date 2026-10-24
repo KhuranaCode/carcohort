@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { Loader, CursorGlow } from './cinematic.jsx';
+import { Loader, CursorGlow, ScrollProgress } from './cinematic.jsx';
 import { AppProvider } from './store.jsx';
 import { Navbar, Footer } from './ui.jsx';
 import Landing from './pages/Landing.jsx';
@@ -25,11 +25,13 @@ export function Shell() {
       <a href="#main" className="skip-link">Skip to content</a>
       <Loader />
       <CursorGlow />
-      <div className="relative z-50 border-b border-white/10 bg-ink-950 px-4 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-300">
+      <ScrollProgress />
+      <div className="fixed inset-x-0 top-0 z-[60] flex h-9 items-center justify-center bg-ink-950 px-4 text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-white/70 sm:h-6 sm:text-[11px] sm:tracking-[0.14em]">
         Interactive prototype · every group, dealer, offer and price is fictional sample data · no real transactions
       </div>
+      <div className="h-9 sm:h-6" aria-hidden="true" />
       <Navbar />
-      <main id="main" className={`flex-1 ${pathname === '/' ? '' : 'pt-24'}`}>
+      <main id="main" className={`flex-1 ${pathname === '/' ? '' : 'pt-[112px] sm:pt-[100px]'}`}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/cars" element={<Cars />} />

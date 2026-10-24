@@ -19,7 +19,7 @@ export function Loader() {
   return (
     <div className={`cc-loader ${done ? 'done' : ''}`} aria-hidden={done} role="status">
       <div className="text-center">
-        <p className="font-display text-2xl font-extrabold uppercase tracking-[0.3em] text-white">Car<span className="text-brand-400">Cohort</span></p>
+        <p className="font-display text-3xl font-bold uppercase tracking-[0.08em] text-ink-900">Car<span className="text-brand-500">/</span>Cohort</p>
         <div className="cc-loader-line mx-auto"><i /></div>
         <span className="sr-only">Loading</span>
       </div>
@@ -27,20 +27,44 @@ export function Loader() {
   );
 }
 
-/** Soft red glow that follows the pointer. Desktop fine-pointer only. */
+/** Sakura-style custom cursor: red dot + trailing ring that grows over interactive elements. */
 export function CursorGlow() {
-  const ref = useRef(null);
+  const dotRef = useRef(null);
+  const ringRef = useRef(null);
   useEffect(() => {
     if (!mq('(hover: hover) and (pointer: fine)').matches || prefersReducedMotion()) return undefined;
-    const el = ref.current;
-    const move = (e) => {
-      el.classList.add('on');
-      gsap.to(el, { x: e.clientX, y: e.clientY, duration: 0.6, ease: 'power3.out' });
+    const dot = dotRef.current; const ring = ringRef.current;
+    const dx = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power3.out' });
+    const dy = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power3.out' });
+    const rx = gsap.quickTo(ring, 'x', { duration: 0.45, ease: 'power3.out' });
+    const ry = gsap.quickTo(ring, 'y', { duration: 0.45, ease: 'power3.out' });
+    const move = (e) => { dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY); };
+    const over = (e) => {
+      const t = e.target.closest('a, button, summary, select, input, textarea, [role="tab"]');
+      ring.classList.toggle('grow', !!t);
     };
     window.addEventListener('pointermove', move, { passive: true });
-    return () => window.removeEventListener('pointermove', move);
+    window.addEventListener('pointerover', over, { passive: true });
+    return () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerover', over); };
   }, []);
-  return <div ref={ref} className="cursor-glow" aria-hidden="true" />;
+  return (<><div ref={dotRef} className="cursor-dot" aria-hidden="true" /><div ref={ringRef} className="cursor-ring" aria-hidden="true" /></>);
+}
+
+/** Thin red scroll-progress line fixed on the right edge, Sakura-style. */
+export function ScrollProgress() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = ref.current;
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      el.style.transform = `scaleY(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return <div className="scroll-progress hidden md:block" aria-hidden="true"><i ref={ref} /></div>;
 }
 
 /** Fade/slide in on first view. */
