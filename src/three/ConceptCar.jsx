@@ -1,16 +1,10 @@
 import { useEffect, useRef } from 'react';
 
-const MODEL_URL = './models/carconcept/CarConcept.glb';
+const MODEL_URL = './models/ferrari-f40/FerrariF40.glb';
 
-/**
- * ConceptCar - the Khronos "Car Concept" sample model (CC-BY 4.0, Eric
- * Chadwick / Darmstadt Graphics Group, via the Khronos glTF sample assets;
- * based on a public-domain model by Unity Fan), rendered live on a studio
- * turntable. An unbranded concept design - deliberately NOT any specific
- * catalogue model, and labelled as a visual demo wherever it appears.
- * Scroll progress drives the turntable (progressRef.current in [0,1]).
- * Honours reduced motion with a static frame; degrades to the CSS studio
- * gradient when WebGL or the model is unavailable.
+/** Licensed Ferrari F40 by Black Snow, CC-BY 4.0.
+ * Source and attribution: public/models/ferrari-f40/ATTRIBUTION.md.
+ * Scroll turns the model; reduced motion renders a static frame.
  */
 export default function ConceptCar({ progressRef, autoSpin = false, className = '' }) {
   const host = useRef(null);

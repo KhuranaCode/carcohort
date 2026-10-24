@@ -1,5 +1,6 @@
 import { PHOTOS, CREDITS, SHOWN } from './photos.js';
-import { useEffect, useState } from 'react';
+import gsap from 'gsap';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useApp } from './store.jsx';
 import { daysLeft } from './utils.js';
@@ -235,4 +236,26 @@ export function SectionHeading({ kicker, title, sub, center = false }) {
       {sub && <p className="mt-3 text-base leading-relaxed text-slate-600">{sub}</p>}
     </div>
   );
+}
+
+/** Subtle pointer tilt for cards. Desktop fine-pointer only; inert otherwise. */
+export function Tilt({ className = '', children, max = 4 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const fine = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!el || !fine || reduced) return undefined;
+    const mv = (e) => {
+      const r = el.getBoundingClientRect();
+      const rx = ((e.clientY - r.top) / r.height - 0.5) * -2 * max;
+      const ry = ((e.clientX - r.left) / r.width - 0.5) * 2 * max;
+      gsap.to(el, { rotationX: rx, rotationY: ry, transformPerspective: 900, duration: 0.5, ease: 'power3.out' });
+    };
+    const lv = () => gsap.to(el, { rotationX: 0, rotationY: 0, duration: 0.7, ease: 'power3.out' });
+    el.addEventListener('pointermove', mv);
+    el.addEventListener('pointerleave', lv);
+    return () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerleave', lv); };
+  }, [max]);
+  return <div ref={ref} className={className} style={{ transformStyle: 'preserve-3d' }}>{children}</div>;
 }

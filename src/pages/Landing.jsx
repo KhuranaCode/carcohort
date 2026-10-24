@@ -1,6 +1,13 @@
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { CITIES, savingsVsEstimate, carById, bestOffer } from '../data.js';
-import { HorizontalJourney, Reveal, CountUp, Rail, useMagnetic } from '../cinematic.jsx';
+import { HorizontalJourney, Reveal, CountUp, Rail, useMagnetic, prefersReducedMotion } from '../cinematic.jsx';
+import { ConceptStage, Shots, Featured, Craft } from '../showcase.jsx';
+import Atmosphere from '../three/Atmosphere.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
 import { useApp } from '../store.jsx';
 import { PHOTOS, CREDITS, SHOWN } from '../photos.js';
 import { SectionHeading, Countdown, ProgressBar, Badge, CarPhoto } from '../ui.jsx';
@@ -138,31 +145,112 @@ export default function Landing() {
     ['Electric revolution', byPop((c) => c.fuel === 'Electric')],
     ['Two-wheelers', byPop((c) => c.type === 'bike' || c.type === 'scooter')],
   ];
+  const heroRef = useRef(null);
   const ctaA = useMagnetic();
+
+  const spec = (c) => [
+    ['Mileage', c.mileage],
+    c.ncap > 0 ? ['Safety (sample)', `${c.ncap}-star catalogue figure`] : ['Seats', String(c.seats)],
+    ['Ex-showroom', `${fmtINR(c.exMin)} - ${fmtINR(c.exMax)}`],
+  ];
+  const shot = (id, kicker, title, focus) => {
+    const c = carById(id);
+    return {
+      id, kicker, title, focus,
+      image: PHOTOS[id],
+      alt: `${c.name} photograph (${SHOWN[id]})`,
+      specs: spec(c),
+      link: { to: `/cars/${id}`, label: `See the ${c.name.replace(/^[A-Za-z]+ /, '')}` },
+      credit: `Photo: ${SHOWN[id]} - ${CREDITS[id].author} (${CREDITS[id].license}) - indicative demo specs`,
+    };
+  };
+  const shots = [
+    shot('thar', '01 · The stance', 'Presence, measured.'),
+    shot('creta', '02 · The detail', 'Every panel, inspected.', 'object-[68%_30%]'),
+    shot('seltos', '03 · The departure', 'Driven off. Owned fully.'),
+  ];
+  const featuredCars = ['thar', 'creta', 'nexon-ev'].map((id) => {
+    const c = carById(id);
+    return {
+      id: c.id, name: c.name, body: c.body, fuel: c.fuel,
+      chips: [c.mileage, c.ncap > 0 ? `${c.ncap}★ safety (sample)` : null, `${c.seats} seats`].filter(Boolean),
+      price: `${fmtINR(c.exMin)} - ${fmtINR(c.exMax)}`,
+      photo: PHOTOS[id],
+      photoAlt: `${c.name} photograph (${SHOWN[id]})`,
+      photoNote: `${SHOWN[id]} · ${CREDITS[id].author} (${CREDITS[id].license})`,
+    };
+  });
+  const craftRows = [
+    {
+      kicker: 'Design, documented', title: 'The exact photo, the exact licence',
+      body: "Every vehicle visual on CarCohort is a real photograph with its author, licence, generation and market disclosed. Where a photo shows an earlier generation or another market's car, the label says so - and where we hold no verified photo at all (Ather 450X), you see a labelled placeholder instead of a wrong car.",
+      image: PHOTOS.xuv700, alt: `Mahindra XUV700 photograph (${SHOWN.xuv700})`,
+      credit: `Photo: ${SHOWN.xuv700} · ${CREDITS.xuv700.author} (${CREDITS.xuv700.license})`,
+      link: { to: '/credits', label: 'Read the photo credits' },
+    },
+    {
+      kicker: 'Curated, not cluttered', title: '19 vehicles. Every price labelled indicative.',
+      body: 'Cars, bikes, scooters and EVs popular with Indian buyers - each carrying sample catalogue figures for ex-showroom range, mileage, safety and seating - indicative demo data, not certified or current ratings.',
+      image: PHOTOS.classic350, alt: `Royal Enfield Classic 350 photograph (${SHOWN.classic350})`,
+      credit: `Photo: ${SHOWN.classic350} · ${CREDITS.classic350.author} (${CREDITS.classic350.license})`,
+      link: { to: '/cars', label: 'Browse the catalogue' },
+    },
+  ];
+
+  // Hero choreography: curtain reveal, staggered headline, light sweep, scroll parallax.
+  useEffect(() => {
+    if (prefersReducedMotion()) return undefined;
+    const el = heroRef.current;
+    if (!el) return undefined;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.fromTo('.hero-img', { clipPath: 'inset(0% 0% 100% 0%)', scale: 1.22 }, { clipPath: 'inset(0% 0% 0% 0%)', scale: 1.06, duration: 1.7 }, 0.1)
+        .from('.hero-line', { y: 90, opacity: 0, duration: 1.1, stagger: 0.13 }, 0.55)
+        .from('.hero-el', { y: 34, opacity: 0, duration: 0.9, stagger: 0.09 }, 0.95)
+        .fromTo('.hero-sweep', { xPercent: -130 }, { xPercent: 130, duration: 1.6, ease: 'power2.inOut' }, 0.9);
+      gsap.to('.hero-img', {
+        yPercent: 12, scale: 1.14, ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
 
   return (
     <div>
-      {/* HERO */}
-      <section className="relative isolate flex min-h-[var(--cc-vh,100svh)] items-end overflow-hidden bg-ink-950 text-white">
-        <img src={img_hero} alt="A black Mahindra Thar on wet tarmac (photo credit on the Credits page)" className="absolute inset-0 -z-10 h-full w-full object-cover object-center" fetchpriority="high" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink-950 via-ink-950/60 to-transparent" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/40" />
-        <div className="container-x relative pb-20 pt-40 lg:pb-24">
-          <p className="kicker">Group car buying · India</p>
-          <h1 className="display-xl mt-5 max-w-4xl text-[14vw] sm:text-[9vw] lg:text-[7.2vw]">Buy together.<br /><span className="text-brand-400">Let dealers</span><br />compete.</h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
+      {/* HERO - Scene A: cinematic opening */}
+      <section ref={heroRef} className="relative isolate flex min-h-[var(--cc-vh,100svh)] items-end overflow-hidden bg-ink-950 text-white">
+        <div className="hero-media absolute inset-0">
+          <img src={img_hero} alt="A black Mahindra Thar on wet tarmac (photo credit on the Credits page)" className="hero-img h-full w-full object-cover object-center" fetchpriority="high" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/40" />
+        <div className="hero-sweep pointer-events-none absolute inset-0" aria-hidden="true" />
+        <Atmosphere className="absolute inset-0" density={1} glow={0.5} />
+        <div className="grain" aria-hidden="true" />
+        <div className="container-x relative z-[2] pb-20 pt-40 lg:pb-24">
+          <p className="hero-el kicker">Group car buying · India</p>
+          <h1 className="display-xl mt-5 max-w-4xl text-[14vw] sm:text-[9vw] lg:text-[7.2vw]">
+            <span className="hero-line block">Buy together.</span>
+            <span className="hero-line block text-brand-400">Let dealers</span>
+            <span className="hero-line block">compete.</span>
+          </h1>
+          <p className="hero-el mt-6 max-w-xl text-lg leading-relaxed text-white/75">
             CarCohort groups buyers who want the same vehicle in the same city, then asks dealerships for their best final on-road price. Dealers compete. You compare. Everyone keeps their own vehicle.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
+          <div className="hero-el mt-9 flex flex-wrap gap-3">
             <Link ref={ctaA} to="/groups" className="btn-accent !px-8 !py-4 !text-base">Find your group</Link>
             <a href="#journey" className="btn-ghost !px-8 !py-4 !text-base">Explore the journey</a>
-            <Link to="/request" className="btn-ghost !px-8 !py-4 !text-base">Get a quote</Link>
+            <Link to="/cars" className="btn-ghost !px-8 !py-4 !text-base">Browse vehicles</Link>
           </div>
-          <div className="mt-8 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+          <div className="hero-el mt-8 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
             <span>Free for buyers</span><span>·</span><span>No obligation to buy</span><span>·</span><span>Savings never guaranteed</span>
           </div>
         </div>
-        <div className="pointer-events-none absolute bottom-6 right-6 hidden items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-white/60 md:flex" aria-hidden="true">
+        <p className="absolute bottom-6 left-4 z-[2] max-w-[46vw] text-[10px] leading-tight text-white/55 sm:left-8">
+          Photo: {SHOWN.thar} · {CREDITS.thar.author} ({CREDITS.thar.license}) · <Link className="underline" to="/credits">credits</Link>
+        </p>
+        <div className="pointer-events-none absolute bottom-6 right-6 z-[2] hidden items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-white/60 md:flex" aria-hidden="true">
           Scroll <span className="relative block h-12 w-px overflow-hidden bg-white/20"><i className="absolute inset-x-0 top-0 block h-5 bg-brand-500 [animation:ccdrop_1.8s_ease-in-out_infinite]" /></span>
         </div>
         <style>{`@keyframes ccdrop{0%{transform:translateY(-100%)}100%{transform:translateY(260%)}}`}</style>
@@ -171,6 +259,17 @@ export default function Landing() {
       {/* SIGNATURE JOURNEY */}
       <HorizontalJourney panels={panels} label="CarCohort scenes" />
       <span id="after-journey" tabIndex={-1} />
+
+      {/* Scene C: scroll-driven shot sequence through the real photo set */}
+      <ConceptStage />
+
+      <Shots shots={shots} />
+
+      {/* Scene D: featured vehicles -> detail pages */}
+      <Featured cars={featuredCars} />
+
+      {/* Scene E: craftsmanship, honestly labelled */}
+      <Craft rows={craftRows} />
 
       {/* STATS (from demo dataset) */}
       <section className="border-y border-white/10 bg-ink-950">

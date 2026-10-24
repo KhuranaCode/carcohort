@@ -5,6 +5,7 @@ import { AppProvider } from './store.jsx';
 import { Navbar, Footer } from './ui.jsx';
 import Landing from './pages/Landing.jsx';
 import Cars from './pages/Cars.jsx';
+import CarDetail from './pages/CarDetail.jsx';
 import Groups from './pages/Groups.jsx';
 import Compare from './pages/Compare.jsx';
 import GroupDetail from './pages/GroupDetail.jsx';
@@ -32,6 +33,7 @@ export function Shell() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/cars" element={<Cars />} />
+          <Route path="/cars/:id" element={<CarDetail />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/groups/:id" element={<GroupDetail />} />

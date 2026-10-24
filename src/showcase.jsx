@@ -23,7 +23,7 @@ const CONCEPT_CAPS = [
   {
     kicker: 'Interactive 3D demo',
     title: 'Turn it with your scroll.',
-    sub: 'A licensed concept model rendered live - your scroll drives the turntable.',
+    sub: 'A Ferrari F40 model rendered live - your scroll drives the turntable.',
   },
   {
     kicker: 'Physically based materials',
@@ -33,7 +33,7 @@ const CONCEPT_CAPS = [
   {
     kicker: 'Honesty stays',
     title: 'The catalogue stays real.',
-    sub: 'Every vehicle you can actually browse carries a real photograph, its licence and plain labels. The concept car is the showpiece, not the inventory.',
+    sub: 'Every vehicle you can actually browse carries a real photograph, its licence and plain labels. The Ferrari F40 is a visual demo, not inventory.',
   },
 ];
 
@@ -81,7 +81,7 @@ export function ConceptStage() {
   }, [pinned, n]);
 
   return (
-    <section ref={root} className="relative border-t border-white/10 bg-ink-950" aria-label="Licensed concept car model, rendered live">
+    <section ref={root} className="relative border-t border-white/10 bg-ink-950" aria-label="Ferrari F40 production-car model, rendered live">
       {(() => {
         const stage = (
           <>
@@ -104,10 +104,10 @@ export function ConceptStage() {
               ))}
             </div>
             <p className="absolute right-4 top-20 z-[4] rounded-full border border-white/15 bg-ink-950/70 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60 backdrop-blur sm:right-8">
-              Licensed concept model · visual demo - not a catalogue model
+              Ferrari F40 · licensed 3D demo · not inventory
             </p>
             <p className="absolute bottom-20 right-4 z-[4] hidden max-w-[240px] text-right text-[10px] leading-tight text-white/45 sm:right-8 md:block lg:bottom-24">
-              3D model: "Car Concept" by Eric Chadwick / Darmstadt Graphics Group (CC-BY 4.0), via the Khronos glTF sample assets. An unbranded design study, not a production car.
+              3D model: "Ferrari f40" by Black Snow (CC-BY 4.0), via Sketchfab. Production-car depiction; visual demo only, not inventory or manufacturer endorsement.
             </p>
             {pinned && (
               <>

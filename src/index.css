@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html { scroll-behavior: smooth; color-scheme: dark; scroll-padding-top: 6rem; }
+html { scroll-behavior: smooth; color-scheme: dark; scroll-padding-top: 6rem; overflow-x: clip; }
+body { overflow-x: clip; }
 body { @apply bg-ink-900 text-slate-700 font-sans antialiased; }
 h1, h2, h3 { font-family: Manrope, Inter, system-ui, sans-serif; letter-spacing: -0.02em; }
 ::selection { background: #e50914; color: #fff; }
@@ -46,7 +47,7 @@ select.input option { background: #111114; color: #fff; }
 .hj { position: relative; background: #050506; }
 .hj-track { display: flex; height: var(--cc-vh, 100svh); width: max-content; }
 .hj-panel { position: relative; flex: 0 0 100vw; width: 100vw; height: var(--cc-vh, 100svh); overflow: hidden; }
-.hj-bg { position: absolute; inset: -4% -12%; width: 124%; height: 108%; object-fit: cover; will-change: transform; }
+.hj-bg { position: absolute; top: -4%; left: -12%; width: 124%; height: 108%; object-fit: cover; will-change: transform; }
 .hj-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,5,6,.92) 0%, rgba(5,5,6,.55) 45%, rgba(5,5,6,.15) 100%), linear-gradient(0deg, rgba(5,5,6,.85), transparent 40%); }
 .hj-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255,255,255,.12); z-index: 5; }
 .hj-progress i { display: block; height: 100%; width: 100%; background: #e50914; transform-origin: left; transform: scaleX(0); }
@@ -74,3 +75,21 @@ select.input option { background: #111114; color: #fff; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 .header-pill { background: rgba(10,10,12,0.92) !important; }
+
+/* cinematic grain - subtle film texture over dark scenes */
+.grain { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.055; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* hero light sweep: a single pass of light across the hero on load */
+.hero-sweep { background: linear-gradient(100deg, transparent 32%, rgba(255,255,255,0.16) 46%, rgba(255,120,110,0.10) 52%, transparent 66%); }
+
+/* masked media reveal on first view */
+.mask-reveal { clip-path: inset(0 0 0 0); }
+@supports (clip-path: inset(0)) {
+  .reveal .mask-reveal { clip-path: inset(8% 6% 8% 6% round 16px); transition: clip-path 1s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in .mask-reveal { clip-path: inset(0 0 0 0 round 0); }
+}
+
+/* shot sequence */
+.shot-layer { will-change: clip-path; }
+.shot-img { will-change: transform; }

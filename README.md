@@ -18,9 +18,12 @@ Mobile catalogue: ![Mobile catalogue](docs/screenshots/84-07-mobile-catalogue.jp
 
 Vehicle photos are real photographs from Wikimedia Commons, each with author and licence on the in-app Photo credits page and in `src/assets/photos/credits.json`. Each photo is labelled with the model, generation and market it actually shows, which can differ from a current variant. The Ather 450X has no verified openly licensed photo yet and shows a labelled placeholder.
 
+The home-page 3D turntable uses **"Ferrari f40" by Black Snow**, licensed [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Original: https://sketchfab.com/3d-models/ferrari-f40-52a66c41cfcd4f999fb1b1c49bf24d70 . Distribution mirror: https://github.com/sceneview/sceneview/releases/download/assets-v1/ferrari_f40.glb . This is a licensed depiction of a real production car, shown as a visual demo only, not catalogue inventory or manufacturer endorsement. Materials and lighting are adjusted at runtime. Rendering uses three.js (MIT licence).
+
 ## Features
 
 - Cinematic dark redesign with a pinned horizontal scroll journey on desktop (GSAP ScrollTrigger) and a swipe version on touch devices, small screens and for reduced-motion users.
+- Interactive 3D concept turntable (three.js, WebGL): a licensed Ferrari F40 model that your scroll turns on a studio stage - pinned scrub on desktop, sticky scroll-turntable on touch/small screens, static frame for reduced-motion. Clearly labelled as a visual demo, not a catalogue model.
 - Buyer quote requests: vehicle, variant, city, budget and delivery date.
 - Sample live groups in Mumbai, Delhi NCR, Bengaluru, Pune and Chandigarh. Joining and leaving is free and non-binding.
 - Dealer portal: dealers submit a bid with a final on-road price and inclusions; the lowest comparable offer surfaces first.
