@@ -4,10 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 import { CITIES, savingsVsEstimate, carById, bestOffer } from '../data.js';
 import { Reveal, CountUp, prefersReducedMotion } from '../cinematic.jsx';
-import ConceptCar from '../three/ConceptCar.jsx';
 import { useApp } from '../store.jsx';
 import { PHOTOS, CREDITS, SHOWN } from '../photos.js';
-import { MODELS3D } from '../three/models.js';
 import { fmtINR } from '../utils.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -93,13 +91,13 @@ function Hero({ totalBuyers, groupCount }) {
         </div>
         <div className="relative">
           <div className="relative" data-hover>
-            <div className="relative aspect-[4/3] w-full">
-              <ConceptCar autoSpin className="absolute inset-0" />
+            <div className="hero-photo relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-ink-900/10">
+              <img src={PHOTOS.thar} alt="Mahindra Thar photograph" fetchpriority="high" className="hero-photo-img absolute inset-0 h-full w-full object-cover" />
             </div>
           </div>
           <Callout className="hero-callout absolute -bottom-5 right-2 sm:right-6">Mahindra Thar · 4 seats</Callout>
           <p className="mt-8 text-[10px] leading-tight text-slate-600">
-            Interactive 3D: {MODELS3D.thar.title} · {MODELS3D.thar.author} ({MODELS3D.thar.license}) · <Link className="underline" to="/credits">credits</Link>
+            Photo: {SHOWN.thar} · {CREDITS.thar.author} ({CREDITS.thar.license}) · <Link className="underline" to="/credits">credits</Link>
           </p>
         </div>
       </div>
