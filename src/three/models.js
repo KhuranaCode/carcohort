@@ -11,7 +11,6 @@ const sk = (slug) => `https://sketchfab.com/3d-models/${slug}`;
 export const MODELS3D = {
   creta:      { file: 'creta.glb',      title: 'Hyundai Creta',            author: 'MattDoesBlender',       license: BY4, page: sk('hyundai-creta-67645b6f549441a786e2b4050dc0268b'), display: 'Hyundai Creta' },
   punch:      { file: '18-punch.glb',      title: 'Tata Punch',               author: 'rahuld',                license: BY4, page: sk('tata-punch-1a85da7678ba4f708cfbee0d9303c5d7'), display: 'Tata Punch' },
-  thar:       { file: '17-thar.glb',       title: 'THAR 4X4',                 author: 'MB_Mahesh',             license: BY4, page: sk('thar-4x4-66ee970b18014c98a1750064b65657b0'), display: 'Mahindra Thar' },
   swift:      { file: 'swift.glb',      title: 'Swift 2024',               author: 'shreyanshchaurasia13',  license: BY4, page: sk('swift-2024-07cf082bab4d430a8a764a23590e35fa'), display: 'Maruti Swift' },
   baleno:     { file: '19-baleno.glb',     title: 'Baleno 2025',              author: 'playmode280513',        license: BY4, page: sk('baleno-2025-b1be858407d3473692580e4291e0627a'), display: 'Maruti Baleno' },
   seltos:     { file: 'seltos.glb',     title: 'Kia Seltos',               author: 'reblevins',             license: BY4, page: sk('kia-seltos-f7786a462a7b4a189e7e2cf436ec06cc'), display: 'Kia Seltos' },
