@@ -17,6 +17,7 @@ function Page({ title, updated, children, credits }) {
 }
 
 import { CREDITS, SHOWN } from '../photos.js';
+import { MODELS3D } from '../three/models.js';
 
 const UPDATED = 'October 2026';
 
@@ -110,6 +111,13 @@ export function Credits() {
       <ul>
         {Object.entries(CREDITS).map(([k, c]) => (
           <li key={k}><b className="text-ink-900">{SHOWN[k] || k}</b>: "{c.title}" by {c.author}, {c.license}.{c.note ? <> <i>{c.note}</i></> : null} <a className="underline" href={c.page} target="_blank" rel="noreferrer noopener">Source page</a></li>
+        ))}
+      </ul>
+      <h2>Interactive 3D models</h2>
+      <p>The interactive 3D stages come from Sketchfab. Each model is used under the licence shown, with the author credited. The only edit is a size-optimised re-export (compressed geometry and textures). Models are fan-made interpretations, so details can differ from a current production vehicle - treat them as illustrations. No manufacturer or creator endorses this prototype.</p>
+      <ul>
+        {Object.entries(MODELS3D).map(([k, m]) => (
+          <li key={k}><b className="text-ink-900">{m.display}</b>: "{m.title}" by {m.author}, {m.license}. <a className="underline" href={m.page} target="_blank" rel="noreferrer noopener">Source page</a></li>
         ))}
       </ul>
     </Page>

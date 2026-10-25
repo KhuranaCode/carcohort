@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CITIES, TYPE_META, variantTiers, estimateOnRoad, CITY_UPLIFT, bestOffer, savingsVsEstimate } from '../data.js';
 import { PHOTOS, CREDITS, SHOWN } from '../photos.js';
+import { MODELS3D, modelUrl } from '../three/models.js';
+import ConceptCar from '../three/ConceptCar.jsx';
 import { useApp } from '../store.jsx';
 import { Badge, Countdown, ProgressBar, SectionHeading } from '../ui.jsx';
 import { Reveal } from '../cinematic.jsx';
@@ -29,6 +31,8 @@ export default function CarDetail() {
 
   const photo = PHOTOS[car.id];
   const credit = CREDITS[car.id];
+  const model3d = MODELS3D[car.id];
+  const model3dUrl = modelUrl(car.id);
   const tiers = variantTiers(car);
   const onRoad = estimateOnRoad(car, city);
   const related = data.cars.filter((c) => c.id !== car.id && (c.body === car.body || c.type === car.type)).slice(0, 3);
@@ -40,7 +44,11 @@ export default function CarDetail() {
         <div className="container-x grid items-center gap-10 py-12 lg:grid-cols-[1.2fr_1fr] lg:py-16">
           <Reveal>
             <div className="relative overflow-hidden rounded-2xl border border-ink-900/10">
-              {photo ? (
+              {model3dUrl ? (
+                <div className="relative aspect-[16/10] w-full bg-paper">
+                  <ConceptCar autoSpin modelUrl={model3dUrl} className="absolute inset-0" />
+                </div>
+              ) : photo ? (
                 <div className="mask-reveal">
                   <img src={photo} alt={`${car.name} photograph (${SHOWN[car.id]})`} className="aspect-[16/10] w-full object-cover" fetchpriority="high" />
                 </div>
@@ -50,7 +58,11 @@ export default function CarDetail() {
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-ink-950/60 to-transparent" />
-              {photo && credit && (
+              {model3d ? (
+                <p className="absolute bottom-3 left-4 right-4 rounded bg-ink-950/70 px-2 py-1.5 text-[10px] leading-tight text-white/90 backdrop-blur-sm">
+                  Interactive 3D: {model3d.title} · {model3d.author} · {model3d.license} · <Link className="underline" to="/credits">credits</Link>
+                </p>
+              ) : photo && credit && (
                 <p className="absolute bottom-3 left-4 right-4 rounded bg-ink-950/70 px-2 py-1.5 text-[10px] leading-tight text-white/90 backdrop-blur-sm">
                   Photo shows: {SHOWN[car.id]} · {credit.author} · {credit.license} · <Link className="underline" to="/credits">credits</Link>
                 </p>
