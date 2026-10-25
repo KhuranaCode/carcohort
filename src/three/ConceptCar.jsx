@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const DEFAULT_URL = './models/vehicles/thar.glb';
+const DEFAULT_URL = './models/vehicles/17-thar.glb';
 
 /** Licensed CC BY 4.0 vehicle models (see src/three/models.js for the roster
  * and per-model attribution). Scroll turns the model; reduced motion renders
